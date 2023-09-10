@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="https://i.imgur.com/4iKP4ar.png">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nikolaimalde.no/hurtigtaster/">
+    <meta property="og:title" content="Nyttige hurtigtaster (spess for lærere)">
+    <meta property="og:description" content="En samling nyttige hurtigtaster...">
+    <meta property="og:image" content="https://i.imgur.com/4iKP4ar.png">
+    <title>Hurtigtaster</title>
+    <style>
+        .container{
+            width: 100%;
+            height: 100px;
+            top: 0px;
+            left: 0px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.7em;
+        }
+        .segment1{
+            display: flex;
+            align-items: center;
+            width: 500px;
+            height: 100px;
+            background-color: #efefef;
+            border-style: ridge;
+            border-color: black;
+            border-width: 1px;
+        }
+        .segment2{
+            display: flex;
+            align-items: center;
+            width: 500px;
+            height: 100px;
+            background-color: #dfdfdf;
+            border-style: ridge;
+            border-color: black;
+            border-width: 1px;
+        }
+    </style>
+    <script type="text/javaScript">
+        window.onload = () => {
+            const body = document.getElementsByTagName('body')[0];
+            // ↹ ⊞ ⯅ ⯆ ⯇ ⯈ ⮠  ⇧
+            const items = [
+                'Til læreren',
+                ['Win (⊞) + P', 'Velg presentasjonsvisningsmodus'],
+                ['Alt + Tab (↹)', 'Naviger mellom åpne vinduer'],
+                ['Win (⊞) + Shift (⇧) + Pil (⯇/⯈)', 'Flytt vindu mellom skjermer'],
+                undefined,
+                'Generelt',
+                ['Ctrl + C', 'Kopier markerte elementer til utklippstavle'],
+                ['Ctrl + X', 'Klipp ut og kopier markerte elementer til utklippstavle'],
+                ['Ctrl + V', 'Lim inn kopierte elementer fra utklippstavle'],
+                ['Ctrl + A', 'Marker alle elementer'],
+                ['Win (⊞) + V', 'Vis utlippstavlehistorikk'],
+                ['Ctrl + Z', 'Angre handling'],
+                ['Ctrl + Y', 'Gjør om handling (motsatt av Ctrl + Z)'],
+                ['Alt + Enter (⮠ )', 'Vis egenskaper til valgt fil'],
+                ['F11', 'Veksle mellom fullskjerm'],
+                ['Win (⊞) + L', 'Gå til låseskjerm'],
+                ['Win (⊞) + Punktum (.)', 'Åpne emoji panel'],
+                ['Win (⊞) + Mellomrom', 'Bytt tastaturets språkinnstilling'],
+                ['Win (⊞) + P', 'Velg presentasjonsvisningsmodus'],
+                ['Win (⊞) + S', 'Åpne søkefelt'],
+                ['Win (⊞) + I', 'Åpne innstillinger'],
+                ['Ctrl + Shift (⇧) + Esc', 'Åpne oppgavebehandling'],
+                undefined,
+                'Kontrolering av vinduer',
+                ['Alt + Tab (↹)', 'Naviger mellom åpne vinduer'],
+                ['Ctrl + Alt + Tab (↹)', 'Åpne navigasjon mellom åpne vinduer'],
+                ['Win (⊞) + Tab + (↹)', 'Åpne oppgaveovevisning'],
+                ['Win (⊞) + Høyre (⯈)', 'Flytt vindu mot høyre'],
+                ['Win (⊞) + Venstre (⯇)', 'Flytt vindu mot venstre'],
+                ['Win (⊞) + Ned (⯆)', 'Krymp/minimer vindu'],
+                ['Win (⊞) + Opp (⯅)', 'Forstørr/gjenopprett minimert vindu'],
+                ['Win (⊞) + Shift (⇧) + Pil (⯇/⯈)', 'Flytt vindu mellom skjermer'],
+                ['Win (⊞) + M', 'Minimer alle vinduer'],
+                ['Win (⊞) + Shift (⇧) + M', 'Gjenopprett minimerte vinduer'],
+                ['Win (⊞) + Komma (,)', 'Titt på skrivebord'],
+                ['Alt + F4', 'Lukk vindu'],
+                undefined,
+                'Skjermbilde og opptak',
+                ['PrtScn', 'Ta skjermbilde og kopier til utklippstavle'],
+                ['Win (⊞) + Shift (⇧) + S', 'Ta skjermbilde av valgt (etter utførelse) område og lagre til utklippstavle'],
+                ['Win (⊞) + PrtScn', 'Ta skjermbilde og lagre som fil<br>(Denne PC-en > Bilder > Sjermbilder)'],
+                ['Win (⊞) + Alt + PrtScn', 'Ta skjermbilde av vindu og lagre som fil<br>(Denne PC-en > Videoer > Captures)'],
+                ['Win (⊞) + Alt + R', 'Start/stopp skjermopptak<br>(Denne PC-en > Videoer > Captures)'],
+                undefined,
+                'Filutforsker',
+                ['Win (⊞) + E', 'Åpne filutforsker'],
+                ['Ctrl + N', 'Åpne ny filutforsker'],
+                ['Ctrl + Shift (⇧) + N', 'Lag ny mappe'],
+                ['Ctrl + W', 'Lukk filutforsker'],
+                ['Alt + P', 'Åpne forhåndsvisningspanelet'],
+                ['Alt + Enter (⮠ )', 'Vis egenskaper til valgt fil'],
+                undefined,
+                'Google Chrome',
+                ['Ctrl + N', 'Åpne nytt vindu'],
+                ['Ctrl + Shift (⇧) + N', 'Åpne nytt inkognito vindu'],
+                ['Ctrl + T', 'Åpne ny fane'],
+                ['Ctrl + Shift (⇧) + T', 'Åpne tidligere lukkede faner'],
+                ['Alt + Home', 'Gå til startskjermen'],
+                ['Ctrl + W', 'Lukk fane'],
+                ['Ctrl + Shift (⇧) + PgUp', 'Flytt fane til venstre'],
+                ['Ctrl + Shift (⇧) + PgDn', 'Flytt fane til høyre'],
+                ['Ctrl + H', 'Åpne søkehistorikk'],
+                ['Ctrl + J', 'Åpne nedlastingshistorikk'],
+                ['Ctrl + F', 'Åpne søkefeltet for gjelende side'],
+                ['Ctrl + Shift (⇧) + J', 'Åpne utviklerverktøy'],
+                ['Ctrl + Shift (⇧) + Delete', 'Åpne alternativer for tømming av nettleserdata'],
+                ['Ctrl + R', 'Last inn gjelende side på nytt'],
+                ['Ctrl + O', 'Åpne fil fra PC-en'],
+                ['Ctrl + D', 'Lagre gjelende side som bokmerke'],
+                ['Ctrl + Shift (⇧) + D', 'Lagre åpne faner som bokmerker i en ny mappe'],
+                ['Ctrl og +', 'Forstørr side'],
+                ['Ctrl og -', 'Krymp side'],
+                ['Ctrl + 0', 'Nullstill sidestørrelse']
+            ];
+            for (var i = 0; i < items.length; i++) {
+                if (typeof items[i] === 'string') {
+                    const div = document.createElement('div');
+                    div.classList.add('container');
+                    div.style.alignItems = 'center';
+                    div.style.fontWeight = 'bold';
+                    div.style.fontSize = '3em';
+                    div.innerHTML = items[i];
+                    body.appendChild(div);
+                } else if (items[i] === undefined) {
+                    body.appendChild(document.createElement('br'));
+                    body.appendChild(document.createElement('br'));
+                } else {
+                    const container = document.createElement('div');
+                    container.classList.add('container');
+                    const shortcut = document.createElement('div');
+                    const explanation = document.createElement('div');
+                    shortcut.innerHTML = items[i][0]
+                    explanation.innerHTML = items[i][1]
+                    if (i%2) {
+                        shortcut.classList.add('segment1');
+                        explanation.classList.add('segment1');
+                    } else {
+                        shortcut.classList.add('segment2');
+                        explanation.classList.add('segment2');
+                    }
+                    container.append(shortcut, explanation);
+                    body.appendChild(container);
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container" style="align-items: center; text-align: center; font-size: 1.35em;">
+        <span>Om eventuelle spørsmål eller forslag kan du ta kontakt med Nikolai Malde via <a href="https://itslearning.com">Itslearning</a> eller ved å sende email til <a href="mailto: nikolai@nikolaimalde.no">nikolai@nikolaimalde.no</a></span>
+    </div>
+</body>
+</html>

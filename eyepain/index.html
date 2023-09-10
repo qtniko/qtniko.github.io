@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wow</title>
+    <link rel="icon" type="image" href="https://i.imgur.com/evJrOWV.png">
+    <script type='text/javascript'>
+        window.onload = () => {
+            const body = document.getElementsByTagName('div')[0];
+            setInterval(() => {
+                let R = Math.floor(Math.random() * 255).toString(16);
+                if (R.length == 1) R = '0'+R;
+                let G = Math.floor(Math.random() * 255).toString(16);
+                if (G.length == 1) G = '0'+G;
+                let B = Math.floor(Math.random() * 255).toString(16);
+                if (B.length == 1) B = '0'+B;
+                body.style.backgroundColor = `#${R}${G}${B}`;
+            }, 100);
+        }
+    </script>
+</head>
+<body>
+    <div style="width: 100%; height: 100%; position:fixed; top:0px; left:0px;"></div>
+</body>
+</html>
