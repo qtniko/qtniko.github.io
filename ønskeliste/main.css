@@ -1,10 +1,33 @@
 body {
-    background-color: darkslategrey;
+    background-color: #04291e;
     display: flex;
     justify-content: center;
+    align-items: center;
     text-align: center;
+    font-size: 3em;
+    color: #ffffff;
+    font-family: 'Comic Sans MS', cursive;
 }
 
 p {
     font-size: large;
+}
+
+.num {
+    display: inline;
+    color: #757575;
+}
+
+.extratxt {
+    display: inline;
+    color: #757575;
+}
+
+.price {
+    /* display: inline; */
+    color: bisque;
+}
+
+a {
+    color: #4097c5;
 }
