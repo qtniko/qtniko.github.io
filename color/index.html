@@ -9,7 +9,7 @@
     <title>wow</title>
     <script type='text/javascript'>
     
-        window.onload = () => checkParams();
+        window.onload = () => showColor(randomColor());
         
         function isHexColor (string) {
             return new RegExp("^(\#)?[0123456789abcdefABCDEF]{6}$").test(string);
