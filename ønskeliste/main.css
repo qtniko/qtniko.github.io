@@ -2,13 +2,12 @@
 
 body {
     background-color: #04291e;
-    padding-left: 10%;
-    padding-right: 10%;
+    overflow-x: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
-    font-size: 3em;
+    font-size: 2em;
     color: #ffffff;
     font-family: 'Comic Sans MS', 'Comic Neue', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
