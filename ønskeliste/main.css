@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue&display=swap');
+
 body {
     background-color: #04291e;
     display: flex;
@@ -6,7 +8,7 @@ body {
     text-align: center;
     font-size: 3em;
     color: #ffffff;
-    font-family: 'Comic Sans MS', cursive;
+    font-family: 'Comic Sans MS', 'Comic Neue', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 p {
