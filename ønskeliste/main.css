@@ -2,6 +2,7 @@
 
 body {
     background-color: #04291e;
+    padding: 5%;
     display: flex;
     justify-content: center;
     align-items: center;
