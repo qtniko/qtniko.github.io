@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image" href="./icons/N.png">
+<title>Gruble</title>
+
+<script>
+  var pool = [
+    'bilmerke',
+    'yrker',
+    'land',
+    'hovedstader',
+    'byer i Norge',
+    'guttenavn',
+    'jentenavn',
+    'møbler',
+    'kjøkkenredskaper',
+    'verktøy',
+    'klesmerker',
+    'klesbutikker',
+    'matbutikker',
+    'brettspill',
+    'videospill',
+    'fisk',
+    'pattedyr',
+    'fugler',
+    'blomster',
+    'havdyr',
+    'middager',
+    'deserter',
+    'drikker',
+    'hunderaser',
+    'filmer',
+    'serier',
+    'barne TV',
+    'artister',
+    'skuespillere',
+    'godteri',
+    'sporter',
+    'frukt og grønt',
+    'fremkomsmiddler'
+  ];
+  used = [];
+
+  function setElementContent(id, content) {
+    var element = document.getElementById(id);
+    element.textContent = content;
+  }
+
+  function resetPool() {
+    pool.push(...used)
+  }
+
+  function getRandomElements() {
+    var selectedElements = [];
+
+    for (var i = 0; i < 5; i++) {
+      if (!pool.length) resetPool()
+      var randomIndex = Math.floor(Math.random() * pool.length);
+      selectedElements.push(pool.splice(randomIndex, 1)[0]);
+    }
+
+    checkbox = document.getElementById('checkbox');
+    if (!checkbox.checked) {
+      pool.push(...selectedElements);
+    } else {
+      used.push(...selectedElements);
+    }
+
+    setElementContent('themes', selectedElements.join(', '));
+  }
+
+
+  function getRandomLetters() {
+    var alphabet = 'ABCDEFGHIJKLMNOPRSTUVY'.split('');
+    var randomLetters = [];
+    
+    for (var i = 0; i < 5; i++) {
+      var randomIndex = Math.floor(Math.random() * alphabet.length);
+      randomLetters.push(alphabet.splice(randomIndex, 1)[0]);
+    }
+
+    setElementContent('letters', randomLetters.join(', '));
+  }
+
+  function randomize() {
+    getRandomElements();
+    getRandomLetters();
+  }
+</script>
+
+<style>
+  body {
+    transform: scale(3);
+    transform-origin: top left;
+    color: azure;
+    background-color: rgb(41, 41, 41);
+  }
+  p {
+    padding: 10px;
+    margin: 0;
+  }
+</style>
+
+</head>
+<body>
+  <br>
+  <input type="checkbox" id="checkbox" name="checkbox" checked>
+  <label for="checkbox">Fjern temaer (når de dukker opp)</label>
+  <br>
+  <button onclick="resetPool()">Reset temaer</button>
+  <br><br><br>
+  <button onclick="randomize()">Nytt brett</button>
+  <p id="themes"></p>
+  <p id="letters"></p>
+</body>
+</html>
