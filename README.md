@@ -2,6 +2,6 @@
 Website go brr
 
 ## Webpages
-- [Random Color Generator](https://nikolaimalde.no/color)
-- [Dancing Cat](https://nikolaimalde.no/cat)
-- [Number System Converter](https://nikolaimalde.no/numbers)
+- [Random Color Generator](https://nikos.no/color)
+- [Dancing Cat](https://nikos.no/cat)
+- [Number System Converter](https://nikos.no/numbers)
