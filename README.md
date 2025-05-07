@@ -1,4 +1,4 @@
-# nmalde.no
+# nikos.no
 Website go brr
 
 ## Webpages
