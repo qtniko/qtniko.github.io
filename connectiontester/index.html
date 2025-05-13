@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Connection Monitor</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    #status {
+      font-size: 2rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Connection Monitor</h1>
+  <p id="status">Nothing wrong...</p>
+
+  <script>
+    const statusDisplay = document.getElementById('status');
+    const url = "https://www.google.com/favicon.ico";
+    const interval = 1000; // 1 second
+    const timeoutLimit = 3000; // 3 seconds
+    let isSus = false;
+
+    async function checkConnection() {
+      if (isSus) return; // stop updating if already sus
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutLimit);
+
+      try {
+        const response = await fetch(url + "?t=" + Date.now(), {
+          method: "GET",
+          cache: "no-cache",
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error("HTTP error: " + response.status);
+        }
+
+        statusDisplay.textContent = "Nothing wrong...";
+      } catch (error) {
+        statusDisplay.textContent = "sus amogus";
+        isSus = true;
+      }
+    }
+
+    setInterval(checkConnection, interval);
+  </script>
+</body>
+</html>
