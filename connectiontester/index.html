@@ -44,8 +44,6 @@
         if (!response.ok) {
           throw new Error("HTTP error: " + response.status);
         }
-
-        statusDisplay.textContent = "Nothing wrong...";
       } catch (error) {
         statusDisplay.textContent = "sus amogus";
         isSus = true;
