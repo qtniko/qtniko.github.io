@@ -14,6 +14,7 @@ function setImage(url) {
   img.style.maxHeight = '100%';
 
   container.appendChild(img);
+  container.dataset.imageUrl = url;
   setDownloadButtonState(true);
 }
 
