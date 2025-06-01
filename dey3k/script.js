@@ -29,8 +29,8 @@ function setDownloadButtonState(state) {
   }
 }
 
-async function resolveEmojiUrl(emojiId) {
-  const base = `https://cdn.discordapp.com/emojis/${emojiId}`;
+async function resolveEmojiUrl(id) {
+  const base = `https://cdn.discordapp.com/emojis/${id}`;
   const gifUrl = `${base}.gif`;
   const pngUrl = `${base}.png`;
 
@@ -104,4 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Download failed:', err);
     }
   });
+
+  // Support for ?id=<id>
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+
+  if (id) {
+    input.value = id;
+    input.dispatchEvent(new Event('input'));
+  }
 });
