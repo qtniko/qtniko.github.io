@@ -14,7 +14,6 @@ function setImage(url) {
   img.style.maxHeight = '100%';
 
   container.appendChild(img);
-  console.log(url);
   container.dataset.imageUrl = url;
   setDownloadButtonState(true);
 }
@@ -78,20 +77,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Handle download button click
-  button.addEventListener('click', () => {
+  button.addEventListener('click', async () => {
     const imageUrl = container.dataset.imageUrl;
-
+  
     if (!imageUrl) {
-      console.log(imageUrl);
       console.error('No image available to download.');
       return;
     }
-
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = `image.${imageUrl.endsWith('.gif') ? 'gif' : 'png'}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  
+    try {
+      const response = await fetch(imageUrl, { mode: 'cors' });
+      if (!response.ok) throw new Error('Failed to fetch image.');
+  
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+  
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `emoji.${imageUrl.endsWith('.gif') ? 'gif' : 'png'}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error('Download failed:', err);
+    }
   });
 });
