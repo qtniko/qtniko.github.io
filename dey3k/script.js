@@ -28,11 +28,55 @@ function setDownloadButtonState(state) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const button = document.querySelector('.download-button');
+async function resolveEmojiUrl(emojiId) {
+  const base = `https://cdn.discordapp.com/emojis/${emojiId}`;
+  const gifUrl = `${base}.gif`;
+  const pngUrl = `${base}.png`;
 
+  try {
+    const gifResponse = await fetch(gifUrl, { method: 'HEAD' });
+    if (gifResponse.ok) return gifUrl;
+  } catch (e) {
+    console.warn('GIF fetch failed:', e);
+  }
+
+  try {
+    const pngResponse = await fetch(pngUrl, { method: 'HEAD' });
+    if (pngResponse.ok) return pngUrl;
+  } catch (e) {
+    console.warn('PNG fetch failed:', e);
+  }
+
+  return undefined;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.querySelector('.input-box');
+  const button = document.querySelector('.download-button');
+  const container = document.querySelector('.image-container');
+
+  // Handle input changes
+  input.addEventListener('input', async () => {
+    const value = input.value.trim();
+
+    if (!value) {
+      enableDownloadButton(false);
+      container.innerHTML = '<span>No image yet</span>';
+      return;
+    }
+
+    const url = await resolveEmojiUrl(value);
+
+    if (url) {
+      setImage(url);
+    } else {
+      enableDownloadButton(false);
+      container.innerHTML = '<span>Invalid or missing emoji</span>';
+    }
+  });
+
+  // Handle download button click
   button.addEventListener('click', () => {
-    const container = document.querySelector('.image-container');
     const imageUrl = container.dataset.imageUrl;
 
     if (!imageUrl) {
