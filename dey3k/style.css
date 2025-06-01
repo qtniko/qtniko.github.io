@@ -2,6 +2,8 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
 }
 
 .container {
@@ -14,28 +16,38 @@ body {
   font-size: 1rem;
   padding: 0.5em;
   width: 200px;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border: 1px solid #444;
+  border-radius: 4px;
+}
+
+.input-box::placeholder {
+  color: #888;
 }
 
 .image-container {
   margin-top: 20px;
   width: 300px;
   height: 200px;
-  border: 2px dashed #ccc;
+  border: 2px dashed #444;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-left: auto;
   margin-right: auto;
+  background-color: #1e1e1e;
 }
 
 .download-button {
   margin-top: 20px;
   padding: 0.5em 1em;
   font-size: 1rem;
-  background-color: #ccc;
+  background-color: #333;
   border: none;
-  color: #666;
+  color: #888;
   cursor: not-allowed;
+  border-radius: 4px;
 }
 
 .download-button.enabled {
