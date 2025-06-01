@@ -33,19 +33,27 @@ async function resolveEmojiUrl(id) {
   const base = `https://cdn.discordapp.com/emojis/${id}`;
   const gifUrl = `${base}.gif`;
   const pngUrl = `${base}.png`;
+  const stickerUrl = `https://cdn.discordapp.com/stickers/${id}.png`;
 
   try {
     const gifResponse = await fetch(gifUrl, { method: 'HEAD' });
     if (gifResponse.ok) return gifUrl;
   } catch (e) {
-    console.warn('GIF fetch failed:', e);
+    console.warn('GIF (emoji) fetch failed:', e);
   }
 
   try {
     const pngResponse = await fetch(pngUrl, { method: 'HEAD' });
     if (pngResponse.ok) return pngUrl;
   } catch (e) {
-    console.warn('PNG fetch failed:', e);
+    console.warn('PNG (emoji) fetch failed:', e);
+  }
+
+  try {
+    const pngResponse = await fetch(stickerUrl, { method: 'HEAD' });
+    if (pngResponse.ok) return stickerUrl;
+  } catch (e) {
+    console.warn('PNG (sticker) fetch failed:', e);
   }
 
   return undefined;
