@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const value = input.value.trim();
 
     if (!value) {
-      enableDownloadButton(false);
+      setDownloadButtonState(false);
       container.innerHTML = '<span>No image yet</span>';
       return;
     }
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (url) {
       setImage(url);
     } else {
-      enableDownloadButton(false);
+      setDownloadButtonState(false);
       container.innerHTML = '<span>Invalid or missing emoji</span>';
     }
   });
