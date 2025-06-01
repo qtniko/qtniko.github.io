@@ -37,3 +37,9 @@ body {
   color: #666;
   cursor: not-allowed;
 }
+
+.download-button.enabled {
+  background-color: #4287f5;
+  color: white;
+  cursor: pointer;
+}
