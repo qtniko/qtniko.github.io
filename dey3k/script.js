@@ -14,6 +14,7 @@ function setImage(url) {
   img.style.maxHeight = '100%';
 
   container.appendChild(img);
+  console.log(url);
   container.dataset.imageUrl = url;
   setDownloadButtonState(true);
 }
@@ -81,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageUrl = container.dataset.imageUrl;
 
     if (!imageUrl) {
+      console.log(imageUrl);
       console.error('No image available to download.');
       return;
     }
