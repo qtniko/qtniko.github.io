@@ -50,7 +50,7 @@
         <h2>Search & filters</h2>
         <label class="field">
           <span>Search</span>
-          <input id="searchInput" type="search" placeholder="Mudkip, Water, Hydro Cannon, #260, trade…" autocomplete="off" />
+          <input id="searchInput" type="search" placeholder="Mudkip, Water, raids, gyms, defense, legendary, #260…" autocomplete="off" />
         </label>
 
         <div class="filter-grid">
@@ -79,23 +79,13 @@
           </select></label>
           <button id="resetFilters" class="ghost-button" type="button">Reset</button>
         </div>
-
-        <section class="mini-panel">
-          <h3>Action legend</h3>
-          <dl class="legend">
-            <div><dt>trade</dt><dd>Bad stats are worth rerolling.</dd></div>
-            <div><dt>keep++</dt><dd>Keep, evolve, and power up.</dd></div>
-            <div><dt>keep evolve</dt><dd>Keep and evolve, but don’t rush power-up.</dd></div>
-            <div><dt>transfer</dt><dd>Strict storage-cleanup transfer.</dd></div>
-          </dl>
-        </section>
       </aside>
 
       <section class="results-area">
         <div class="toolbar panel">
           <div>
             <h2 id="resultCount">Loading…</h2>
-            <p id="dataStatus">Reading CSV data.</p>
+            <p id="dataStatus"></p>
           </div>
           <div class="pill-row" id="activeFilters"></div>
         </div>
@@ -106,7 +96,7 @@
       <aside id="detail" class="panel detail-panel">
         <div class="empty-detail">
           <h2>Select a Pokémon</h2>
-          <p>Pick a card to see moves, ratings, actions, evolution costs, flags, and family links.</p>
+          <p>Pick a card to see type strengths, ratings, moves, actions, evolution costs, flags, and family links.</p>
         </div>
       </aside>
     </main>
