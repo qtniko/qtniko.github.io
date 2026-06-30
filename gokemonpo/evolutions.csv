@@ -1,0 +1,626 @@
+from_id,from_pokemon,from_form,to_id,to_pokemon,to_form,evolution_kind,candy_cost,item_required,lure_required,special_requirement,mega_energy_initial_cost,mega_energy_subsequent_cost,notes,last_reviewed
+bulbasaur,Bulbasaur,,ivysaur,Ivysaur,,normal,25,,,,,,,2026-06-30
+ivysaur,Ivysaur,,venusaur,Venusaur,,normal,100,,,,,,,2026-06-30
+charmander,Charmander,,charmeleon,Charmeleon,,normal,25,,,,,,,2026-06-30
+charmeleon,Charmeleon,,charizard,Charizard,,normal,100,,,,,,,2026-06-30
+squirtle,Squirtle,,wartortle,Wartortle,,normal,25,,,,,,,2026-06-30
+wartortle,Wartortle,,blastoise,Blastoise,,normal,100,,,,,,,2026-06-30
+caterpie,Caterpie,,metapod,Metapod,,normal,12,,,,,,,2026-06-30
+metapod,Metapod,,butterfree,Butterfree,,normal,50,,,,,,,2026-06-30
+weedle,Weedle,,kakuna,Kakuna,,normal,12,,,,,,,2026-06-30
+kakuna,Kakuna,,beedrill,Beedrill,,normal,50,,,,,,,2026-06-30
+pidgey,Pidgey,,pidgeotto,Pidgeotto,,normal,12,,,,,,,2026-06-30
+pidgeotto,Pidgeotto,,pidgeot,Pidgeot,,normal,50,,,,,,,2026-06-30
+rattata,Rattata,,raticate,Raticate,,normal,25,,,,,,,2026-06-30
+rattata_rattata_alola,Rattata,Alolan,raticate_raticate_alola,Raticate,Alolan,normal,25,,,,,,,2026-06-30
+spearow,Spearow,,fearow,Fearow,,normal,50,,,,,,,2026-06-30
+ekans,Ekans,,arbok,Arbok,,normal,50,,,,,,,2026-06-30
+pikachu,Pikachu,,raichu,Raichu,,normal,50,,,,,,,2026-06-30
+sandshrew,Sandshrew,,sandslash,Sandslash,,normal,50,,,,,,,2026-06-30
+sandshrew_sandshrew_alola,Sandshrew,Alolan,sandslash_sandslash_alola,Sandslash,Alolan,normal,50,,,,,,,2026-06-30
+nidoran_female,Nidoran♀,,nidorina,Nidorina,,normal,25,,,,,,,2026-06-30
+nidorina,Nidorina,,nidoqueen,Nidoqueen,,normal,100,,,,,,,2026-06-30
+nidoran_male,Nidoran♂,,nidorino,Nidorino,,normal,25,,,,,,,2026-06-30
+nidorino,Nidorino,,nidoking,Nidoking,,normal,100,,,,,,,2026-06-30
+clefairy,Clefairy,,clefable,Clefable,,normal,50,,,,,,,2026-06-30
+vulpix,Vulpix,,ninetales,Ninetales,,normal,50,,,,,,,2026-06-30
+vulpix_vulpix_alola,Vulpix,Alolan,ninetales_ninetales_alola,Ninetales,Alolan,normal,50,,,,,,,2026-06-30
+jigglypuff,Jigglypuff,,wigglytuff,Wigglytuff,,normal,50,,,,,,,2026-06-30
+zubat,Zubat,,golbat,Golbat,,normal,25,,,,,,,2026-06-30
+golbat,Golbat,,crobat,Crobat,,normal,100,,,,,,,2026-06-30
+oddish,Oddish,,gloom,Gloom,,normal,25,,,,,,,2026-06-30
+gloom,Gloom,,vileplume,Vileplume,,normal,100,,,,,,,2026-06-30
+gloom,Gloom,,bellossom,Bellossom,,normal,100,ITEM_SUN_STONE,,,,,,2026-06-30
+paras,Paras,,parasect,Parasect,,normal,50,,,,,,,2026-06-30
+venonat,Venonat,,venomoth,Venomoth,,normal,50,,,,,,,2026-06-30
+diglett,Diglett,,dugtrio,Dugtrio,,normal,50,,,,,,,2026-06-30
+diglett_diglett_alola,Diglett,Alolan,dugtrio_dugtrio_alola,Dugtrio,Alolan,normal,50,,,,,,,2026-06-30
+meowth,Meowth,,persian,Persian,,normal,50,,,,,,,2026-06-30
+meowth_meowth_alola,Meowth,Alolan,persian_persian_alola,Persian,Alolan,normal,50,,,,,,,2026-06-30
+meowth_meowth_galarian,Meowth,Galarian,perrserker,Perrserker,,normal,50,,,,,,,2026-06-30
+psyduck,Psyduck,,golduck,Golduck,,normal,50,,,,,,,2026-06-30
+mankey,Mankey,,primeape,Primeape,,normal,50,,,,,,,2026-06-30
+primeape,Primeape,,annihilape,Annihilape,,normal,100,,,,,,,2026-06-30
+growlithe,Growlithe,,arcanine,Arcanine,,normal,50,,,,,,,2026-06-30
+growlithe_growlithe_hisuian,Growlithe,Hisuian,arcanine_arcanine_hisuian,Arcanine,Hisuian,normal,50,,,,,,,2026-06-30
+poliwag,Poliwag,,poliwhirl,Poliwhirl,,normal,25,,,,,,,2026-06-30
+poliwhirl,Poliwhirl,,poliwrath,Poliwrath,,normal,100,,,,,,,2026-06-30
+poliwhirl,Poliwhirl,,politoed,Politoed,,normal,100,ITEM_KINGS_ROCK,,,,,,2026-06-30
+abra,Abra,,kadabra,Kadabra,,normal,25,,,,,,,2026-06-30
+kadabra,Kadabra,,alakazam,Alakazam,,normal,100,,,,,,,2026-06-30
+machop,Machop,,machoke,Machoke,,normal,25,,,,,,,2026-06-30
+machoke,Machoke,,machamp,Machamp,,normal,100,,,,,,,2026-06-30
+bellsprout,Bellsprout,,weepinbell,Weepinbell,,normal,25,,,,,,,2026-06-30
+weepinbell,Weepinbell,,victreebel,Victreebel,,normal,100,,,,,,,2026-06-30
+tentacool,Tentacool,,tentacruel,Tentacruel,,normal,50,,,,,,,2026-06-30
+geodude,Geodude,,graveler,Graveler,,normal,25,,,,,,,2026-06-30
+geodude_geodude_alola,Geodude,Alolan,graveler_graveler_alola,Graveler,Alolan,normal,25,,,,,,,2026-06-30
+graveler,Graveler,,golem,Golem,,normal,100,,,,,,,2026-06-30
+graveler_graveler_alola,Graveler,Alolan,golem_golem_alola,Golem,Alolan,normal,100,,,,,,,2026-06-30
+ponyta,Ponyta,,rapidash,Rapidash,,normal,50,,,,,,,2026-06-30
+ponyta_ponyta_galarian,Ponyta,Galarian,rapidash_rapidash_galarian,Rapidash,Galarian,normal,50,,,,,,,2026-06-30
+slowpoke,Slowpoke,,slowbro,Slowbro,,normal,50,,,,,,,2026-06-30
+slowpoke,Slowpoke,,slowking,Slowking,,normal,50,ITEM_KINGS_ROCK,,,,,,2026-06-30
+slowpoke_slowpoke_2020,Slowpoke,2020,slowbro,Slowbro,,normal,50,,,,,,,2026-06-30
+slowpoke_slowpoke_2020,Slowpoke,2020,slowking,Slowking,,normal,50,ITEM_KINGS_ROCK,,,,,,2026-06-30
+slowpoke_slowpoke_galarian,Slowpoke,Galarian,slowbro_slowbro_galarian,Slowbro,Galarian,normal,50,,,,,,,2026-06-30
+slowpoke_slowpoke_galarian,Slowpoke,Galarian,slowking_slowking_galarian,Slowking,Galarian,normal,50,,,,,,,2026-06-30
+magnemite,Magnemite,,magneton,Magneton,,normal,25,,,,,,,2026-06-30
+magneton,Magneton,,magnezone,Magnezone,,normal,100,,ITEM_TROY_DISK_MAGNETIC,Requires lure,,,,2026-06-30
+farfetchd_farfetchd_galarian,Farfetch'd,Galarian,sirfetchd,Sirfetch'd,,normal,50,,,,,,,2026-06-30
+doduo,Doduo,,dodrio,Dodrio,,normal,50,,,,,,,2026-06-30
+seel,Seel,,dewgong,Dewgong,,normal,50,,,,,,,2026-06-30
+grimer,Grimer,,muk,Muk,,normal,50,,,,,,,2026-06-30
+grimer_grimer_alola,Grimer,Alolan,muk_muk_alola,Muk,Alolan,normal,50,,,,,,,2026-06-30
+shellder,Shellder,,cloyster,Cloyster,,normal,50,,,,,,,2026-06-30
+gastly,Gastly,,haunter,Haunter,,normal,25,,,,,,,2026-06-30
+haunter,Haunter,,gengar,Gengar,,normal,100,,,,,,,2026-06-30
+onix,Onix,,steelix,Steelix,,normal,50,ITEM_METAL_COAT,,,,,,2026-06-30
+drowzee,Drowzee,,hypno,Hypno,,normal,50,,,,,,,2026-06-30
+krabby,Krabby,,kingler,Kingler,,normal,50,,,,,,,2026-06-30
+voltorb,Voltorb,,electrode,Electrode,,normal,50,,,,,,,2026-06-30
+voltorb_voltorb_hisuian,Voltorb,Hisuian,electrode_electrode_hisuian,Electrode,Hisuian,normal,50,,,,,,,2026-06-30
+exeggcute,Exeggcute,,exeggutor,Exeggutor,,normal,50,,,,,,,2026-06-30
+cubone,Cubone,,marowak,Marowak,,normal,50,,,,,,,2026-06-30
+lickitung,Lickitung,,lickilicky,Lickilicky,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+koffing,Koffing,,weezing,Weezing,,normal,50,,,,,,,2026-06-30
+rhyhorn,Rhyhorn,,rhydon,Rhydon,,normal,25,,,,,,,2026-06-30
+rhydon,Rhydon,,rhyperior,Rhyperior,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+chansey,Chansey,,blissey,Blissey,,normal,50,,,,,,,2026-06-30
+tangela,Tangela,,tangrowth,Tangrowth,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+horsea,Horsea,,seadra,Seadra,,normal,25,,,,,,,2026-06-30
+seadra,Seadra,,kingdra,Kingdra,,normal,100,ITEM_DRAGON_SCALE,,,,,,2026-06-30
+goldeen,Goldeen,,seaking,Seaking,,normal,50,,,,,,,2026-06-30
+staryu,Staryu,,starmie,Starmie,,normal,50,,,,,,,2026-06-30
+mr_mime_mr_mime_galarian,Mr. Mime,Galarian,mr_rime,Mr. Rime,,normal,50,,,,,,,2026-06-30
+scyther,Scyther,,scizor,Scizor,,normal,50,ITEM_METAL_COAT,,,,,,2026-06-30
+electabuzz,Electabuzz,,electivire,Electivire,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+magmar,Magmar,,magmortar,Magmortar,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+magikarp,Magikarp,,gyarados,Gyarados,,normal,400,,,,,,,2026-06-30
+eevee,Eevee,,vaporeon,Vaporeon,,normal,25,,,,,,,2026-06-30
+eevee,Eevee,,jolteon,Jolteon,,normal,25,,,,,,,2026-06-30
+eevee,Eevee,,flareon,Flareon,,normal,25,,,,,,,2026-06-30
+eevee,Eevee,,espeon,Espeon,,normal,25,,,,,,,2026-06-30
+eevee,Eevee,,umbreon,Umbreon,,normal,25,,,,,,,2026-06-30
+eevee,Eevee,,leafeon,Leafeon,,normal,25,,ITEM_TROY_DISK_MOSSY,Requires lure,,,,2026-06-30
+eevee,Eevee,,glaceon,Glaceon,,normal,25,,ITEM_TROY_DISK_GLACIAL,Requires lure,,,,2026-06-30
+eevee,Eevee,,sylveon,Sylveon,,normal,25,,,,,,,2026-06-30
+porygon,Porygon,,porygon2,Porygon2,,normal,25,ITEM_UP_GRADE,,,,,,2026-06-30
+omanyte,Omanyte,,omastar,Omastar,,normal,50,,,,,,,2026-06-30
+kabuto,Kabuto,,kabutops,Kabutops,,normal,50,,,,,,,2026-06-30
+dratini,Dratini,,dragonair,Dragonair,,normal,25,,,,,,,2026-06-30
+dragonair,Dragonair,,dragonite,Dragonite,,normal,100,,,,,,,2026-06-30
+chikorita,Chikorita,,bayleef,Bayleef,,normal,25,,,,,,,2026-06-30
+bayleef,Bayleef,,meganium,Meganium,,normal,100,,,,,,,2026-06-30
+cyndaquil,Cyndaquil,,quilava,Quilava,,normal,25,,,,,,,2026-06-30
+quilava,Quilava,,typhlosion,Typhlosion,,normal,100,,,,,,,2026-06-30
+totodile,Totodile,,croconaw,Croconaw,,normal,25,,,,,,,2026-06-30
+croconaw,Croconaw,,feraligatr,Feraligatr,,normal,100,,,,,,,2026-06-30
+sentret,Sentret,,furret,Furret,,normal,25,,,,,,,2026-06-30
+hoothoot,Hoothoot,,noctowl,Noctowl,,normal,50,,,,,,,2026-06-30
+ledyba,Ledyba,,ledian,Ledian,,normal,25,,,,,,,2026-06-30
+spinarak,Spinarak,,ariados,Ariados,,normal,50,,,,,,,2026-06-30
+chinchou,Chinchou,,lanturn,Lanturn,,normal,50,,,,,,,2026-06-30
+pichu,Pichu,,pikachu,Pikachu,,normal,25,,,,,,,2026-06-30
+cleffa,Cleffa,,clefairy,Clefairy,,normal,25,,,,,,,2026-06-30
+igglybuff,Igglybuff,,jigglypuff,Jigglypuff,,normal,25,,,,,,,2026-06-30
+togepi,Togepi,,togetic,Togetic,,normal,25,,,,,,,2026-06-30
+togetic,Togetic,,togekiss,Togekiss,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+natu,Natu,,xatu,Xatu,,normal,50,,,,,,,2026-06-30
+mareep,Mareep,,flaaffy,Flaaffy,,normal,25,,,,,,,2026-06-30
+flaaffy,Flaaffy,,ampharos,Ampharos,,normal,100,,,,,,,2026-06-30
+marill,Marill,,azumarill,Azumarill,,normal,25,,,,,,,2026-06-30
+hoppip,Hoppip,,skiploom,Skiploom,,normal,25,,,,,,,2026-06-30
+skiploom,Skiploom,,jumpluff,Jumpluff,,normal,100,,,,,,,2026-06-30
+aipom,Aipom,,ambipom,Ambipom,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+sunkern,Sunkern,,sunflora,Sunflora,,normal,50,ITEM_SUN_STONE,,,,,,2026-06-30
+yanma,Yanma,,yanmega,Yanmega,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+wooper,Wooper,,quagsire,Quagsire,,normal,50,,,,,,,2026-06-30
+wooper_wooper_paldea,Wooper,Paldean,clodsire,Clodsire,,normal,50,,,,,,,2026-06-30
+murkrow,Murkrow,,honchkrow,Honchkrow,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+misdreavus,Misdreavus,,mismagius,Mismagius,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+pineco,Pineco,,forretress,Forretress,,normal,50,,,,,,,2026-06-30
+dunsparce,Dunsparce,,dudunsparce,Dudunsparce,,normal,50,,,,,,,2026-06-30
+gligar,Gligar,,gliscor,Gliscor,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+snubbull,Snubbull,,granbull,Granbull,,normal,50,,,,,,,2026-06-30
+qwilfish_qwilfish_hisuian,Qwilfish,Hisuian,overqwil,Overqwil,,normal,50,,,,,,,2026-06-30
+sneasel,Sneasel,,weavile,Weavile,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+sneasel_sneasel_hisuian,Sneasel,Hisuian,sneasler,Sneasler,,normal,100,,,,,,,2026-06-30
+teddiursa,Teddiursa,,ursaring,Ursaring,,normal,50,,,,,,,2026-06-30
+ursaring,Ursaring,,ursaluna,Ursaluna,,normal,100,,,,,,,2026-06-30
+slugma,Slugma,,magcargo,Magcargo,,normal,50,,,,,,,2026-06-30
+swinub,Swinub,,piloswine,Piloswine,,normal,25,,,,,,,2026-06-30
+piloswine,Piloswine,,mamoswine,Mamoswine,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+corsola_corsola_galarian,Corsola,Galarian,cursola,Cursola,,normal,50,,,,,,,2026-06-30
+remoraid,Remoraid,,octillery,Octillery,,normal,50,,,,,,,2026-06-30
+houndour,Houndour,,houndoom,Houndoom,,normal,50,,,,,,,2026-06-30
+phanpy,Phanpy,,donphan,Donphan,,normal,50,,,,,,,2026-06-30
+porygon2,Porygon2,,porygon_z,Porygon-Z,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+tyrogue,Tyrogue,,hitmonlee,Hitmonlee,,normal,25,,,,,,,2026-06-30
+tyrogue,Tyrogue,,hitmonchan,Hitmonchan,,normal,25,,,,,,,2026-06-30
+tyrogue,Tyrogue,,hitmontop,Hitmontop,,normal,25,,,,,,,2026-06-30
+smoochum,Smoochum,,jynx,Jynx,,normal,25,,,,,,,2026-06-30
+elekid,Elekid,,electabuzz,Electabuzz,,normal,25,,,,,,,2026-06-30
+magby,Magby,,magmar,Magmar,,normal,25,,,,,,,2026-06-30
+larvitar,Larvitar,,pupitar,Pupitar,,normal,25,,,,,,,2026-06-30
+pupitar,Pupitar,,tyranitar,Tyranitar,,normal,100,,,,,,,2026-06-30
+treecko,Treecko,,grovyle,Grovyle,,normal,25,,,,,,,2026-06-30
+grovyle,Grovyle,,sceptile,Sceptile,,normal,100,,,,,,,2026-06-30
+torchic,Torchic,,combusken,Combusken,,normal,25,,,,,,,2026-06-30
+combusken,Combusken,,blaziken,Blaziken,,normal,100,,,,,,,2026-06-30
+mudkip,Mudkip,,marshtomp,Marshtomp,,normal,25,,,,,,,2026-06-30
+marshtomp,Marshtomp,,swampert,Swampert,,normal,100,,,,,,,2026-06-30
+poochyena,Poochyena,,mightyena,Mightyena,,normal,50,,,,,,,2026-06-30
+zigzagoon,Zigzagoon,,linoone,Linoone,,normal,50,,,,,,,2026-06-30
+zigzagoon_zigzagoon_galarian,Zigzagoon,Galarian,linoone_linoone_galarian,Linoone,Galarian,normal,25,,,,,,,2026-06-30
+linoone_linoone_galarian,Linoone,Galarian,obstagoon,Obstagoon,,normal,100,,,,,,,2026-06-30
+wurmple,Wurmple,,silcoon,Silcoon,,normal,12,,,,,,,2026-06-30
+wurmple,Wurmple,,cascoon,Cascoon,,normal,12,,,,,,,2026-06-30
+silcoon,Silcoon,,beautifly,Beautifly,,normal,50,,,,,,,2026-06-30
+cascoon,Cascoon,,dustox,Dustox,,normal,50,,,,,,,2026-06-30
+lotad,Lotad,,lombre,Lombre,,normal,25,,,,,,,2026-06-30
+lombre,Lombre,,ludicolo,Ludicolo,,normal,100,,,,,,,2026-06-30
+seedot,Seedot,,nuzleaf,Nuzleaf,,normal,25,,,,,,,2026-06-30
+nuzleaf,Nuzleaf,,shiftry,Shiftry,,normal,100,,,,,,,2026-06-30
+taillow,Taillow,,swellow,Swellow,,normal,50,,,,,,,2026-06-30
+wingull,Wingull,,pelipper,Pelipper,,normal,50,,,,,,,2026-06-30
+ralts,Ralts,,kirlia,Kirlia,,normal,25,,,,,,,2026-06-30
+kirlia,Kirlia,,gallade,Gallade,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+kirlia,Kirlia,,gardevoir,Gardevoir,,normal,100,,,,,,,2026-06-30
+surskit,Surskit,,masquerain,Masquerain,,normal,50,,,,,,,2026-06-30
+shroomish,Shroomish,,breloom,Breloom,,normal,50,,,,,,,2026-06-30
+slakoth,Slakoth,,vigoroth,Vigoroth,,normal,25,,,,,,,2026-06-30
+vigoroth,Vigoroth,,slaking,Slaking,,normal,100,,,,,,,2026-06-30
+nincada,Nincada,,ninjask,Ninjask,,normal,50,,,,,,,2026-06-30
+whismur,Whismur,,loudred,Loudred,,normal,12,,,,,,,2026-06-30
+loudred,Loudred,,exploud,Exploud,,normal,50,,,,,,,2026-06-30
+makuhita,Makuhita,,hariyama,Hariyama,,normal,50,,,,,,,2026-06-30
+azurill,Azurill,,marill,Marill,,normal,25,,,,,,,2026-06-30
+nosepass,Nosepass,,probopass,Probopass,,normal,50,,ITEM_TROY_DISK_MAGNETIC,Requires lure,,,,2026-06-30
+skitty,Skitty,,delcatty,Delcatty,,normal,50,,,,,,,2026-06-30
+aron,Aron,,lairon,Lairon,,normal,25,,,,,,,2026-06-30
+lairon,Lairon,,aggron,Aggron,,normal,100,,,,,,,2026-06-30
+meditite,Meditite,,medicham,Medicham,,normal,50,,,,,,,2026-06-30
+electrike,Electrike,,manectric,Manectric,,normal,50,,,,,,,2026-06-30
+roselia,Roselia,,roserade,Roserade,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+gulpin,Gulpin,,swalot,Swalot,,normal,50,,,,,,,2026-06-30
+carvanha,Carvanha,,sharpedo,Sharpedo,,normal,50,,,,,,,2026-06-30
+wailmer,Wailmer,,wailord,Wailord,,normal,400,,,,,,,2026-06-30
+numel,Numel,,camerupt,Camerupt,,normal,50,,,,,,,2026-06-30
+spoink,Spoink,,grumpig,Grumpig,,normal,50,,,,,,,2026-06-30
+trapinch,Trapinch,,vibrava,Vibrava,,normal,25,,,,,,,2026-06-30
+vibrava,Vibrava,,flygon,Flygon,,normal,100,,,,,,,2026-06-30
+cacnea,Cacnea,,cacturne,Cacturne,,normal,50,,,,,,,2026-06-30
+swablu,Swablu,,altaria,Altaria,,normal,400,,,,,,,2026-06-30
+barboach,Barboach,,whiscash,Whiscash,,normal,50,,,,,,,2026-06-30
+corphish,Corphish,,crawdaunt,Crawdaunt,,normal,50,,,,,,,2026-06-30
+baltoy,Baltoy,,claydol,Claydol,,normal,50,,,,,,,2026-06-30
+lileep,Lileep,,cradily,Cradily,,normal,50,,,,,,,2026-06-30
+anorith,Anorith,,armaldo,Armaldo,,normal,50,,,,,,,2026-06-30
+feebas,Feebas,,milotic,Milotic,,normal,100,,,,,,,2026-06-30
+shuppet,Shuppet,,banette,Banette,,normal,50,,,,,,,2026-06-30
+duskull,Duskull,,dusclops,Dusclops,,normal,25,,,,,,,2026-06-30
+dusclops,Dusclops,,dusknoir,Dusknoir,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+wynaut,Wynaut,,wobbuffet,Wobbuffet,,normal,25,,,,,,,2026-06-30
+snorunt,Snorunt,,froslass,Froslass,,normal,100,ITEM_GEN4_EVOLUTION_STONE,,,,,,2026-06-30
+snorunt,Snorunt,,glalie,Glalie,,normal,100,,,,,,,2026-06-30
+spheal,Spheal,,sealeo,Sealeo,,normal,25,,,,,,,2026-06-30
+sealeo,Sealeo,,walrein,Walrein,,normal,100,,,,,,,2026-06-30
+clamperl,Clamperl,,huntail,Huntail,,normal,50,,,,,,,2026-06-30
+clamperl,Clamperl,,gorebyss,Gorebyss,,normal,50,,,,,,,2026-06-30
+bagon,Bagon,,shelgon,Shelgon,,normal,25,,,,,,,2026-06-30
+shelgon,Shelgon,,salamence,Salamence,,normal,100,,,,,,,2026-06-30
+beldum,Beldum,,metang,Metang,,normal,25,,,,,,,2026-06-30
+metang,Metang,,metagross,Metagross,,normal,100,,,,,,,2026-06-30
+turtwig,Turtwig,,grotle,Grotle,,normal,25,,,,,,,2026-06-30
+grotle,Grotle,,torterra,Torterra,,normal,100,,,,,,,2026-06-30
+chimchar,Chimchar,,monferno,Monferno,,normal,25,,,,,,,2026-06-30
+monferno,Monferno,,infernape,Infernape,,normal,100,,,,,,,2026-06-30
+piplup,Piplup,,prinplup,Prinplup,,normal,25,,,,,,,2026-06-30
+prinplup,Prinplup,,empoleon,Empoleon,,normal,100,,,,,,,2026-06-30
+starly,Starly,,staravia,Staravia,,normal,25,,,,,,,2026-06-30
+staravia,Staravia,,staraptor,Staraptor,,normal,100,,,,,,,2026-06-30
+bidoof,Bidoof,,bibarel,Bibarel,,normal,50,,,,,,,2026-06-30
+kricketot,Kricketot,,kricketune,Kricketune,,normal,50,,,,,,,2026-06-30
+shinx,Shinx,,luxio,Luxio,,normal,25,,,,,,,2026-06-30
+luxio,Luxio,,luxray,Luxray,,normal,100,,,,,,,2026-06-30
+budew,Budew,,roselia,Roselia,,normal,25,,,,,,,2026-06-30
+cranidos,Cranidos,,rampardos,Rampardos,,normal,50,,,,,,,2026-06-30
+shieldon,Shieldon,,bastiodon,Bastiodon,,normal,50,,,,,,,2026-06-30
+burmy_wormadam_plant,Burmy,Wormadam Plant,wormadam_wormadam_plant,Wormadam,Plant Cloak,normal,50,,,,,,,2026-06-30
+burmy_wormadam_plant,Burmy,Wormadam Plant,mothim,Mothim,,normal,50,,,,,,,2026-06-30
+burmy_burmy_plant,Burmy,Plant Cloak,wormadam_wormadam_plant,Wormadam,Plant Cloak,normal,50,,,,,,,2026-06-30
+burmy_burmy_plant,Burmy,Plant Cloak,mothim,Mothim,,normal,50,,,,,,,2026-06-30
+burmy_burmy_sandy,Burmy,Sandy Cloak,wormadam_wormadam_sandy,Wormadam,Sandy Cloak,normal,50,,,,,,,2026-06-30
+burmy_burmy_sandy,Burmy,Sandy Cloak,mothim,Mothim,,normal,50,,,,,,,2026-06-30
+burmy_burmy_trash,Burmy,Trash Cloak,wormadam_wormadam_trash,Wormadam,Trash Cloak,normal,50,,,,,,,2026-06-30
+burmy_burmy_trash,Burmy,Trash Cloak,mothim,Mothim,,normal,50,,,,,,,2026-06-30
+combee,Combee,,vespiquen,Vespiquen,,normal,50,,,,,,,2026-06-30
+buizel,Buizel,,floatzel,Floatzel,,normal,50,,,,,,,2026-06-30
+cherubi,Cherubi,,cherrim_cherrim_overcast,Cherrim,Overcast,normal,50,,,,,,,2026-06-30
+cherubi,Cherubi,,cherrim_cherrim_sunny,Cherrim,Sunny,normal,50,,,,,,,2026-06-30
+cherubi_cherrim_overcast,Cherubi,Cherrim Overcast,cherrim_cherrim_overcast,Cherrim,Overcast,normal,50,,,,,,,2026-06-30
+cherubi_cherrim_overcast,Cherubi,Cherrim Overcast,cherrim_cherrim_sunny,Cherrim,Sunny,normal,50,,,,,,,2026-06-30
+shellos_gastrodon_east_sea,Shellos,Gastrodon East Sea,gastrodon_gastrodon_east_sea,Gastrodon,East Sea,normal,50,,,,,,,2026-06-30
+shellos_shellos_east_sea,Shellos,East Sea,gastrodon_gastrodon_east_sea,Gastrodon,East Sea,normal,50,,,,,,,2026-06-30
+shellos_shellos_west_sea,Shellos,West Sea,gastrodon_gastrodon_west_sea,Gastrodon,West Sea,normal,50,,,,,,,2026-06-30
+drifloon,Drifloon,,drifblim,Drifblim,,normal,50,,,,,,,2026-06-30
+buneary,Buneary,,lopunny,Lopunny,,normal,50,,,,,,,2026-06-30
+glameow,Glameow,,purugly,Purugly,,normal,50,,,,,,,2026-06-30
+chingling,Chingling,,chimecho,Chimecho,,normal,50,,,,,,,2026-06-30
+stunky,Stunky,,skuntank,Skuntank,,normal,50,,,,,,,2026-06-30
+bronzor,Bronzor,,bronzong,Bronzong,,normal,50,,,,,,,2026-06-30
+bonsly,Bonsly,,sudowoodo,Sudowoodo,,normal,50,,,,,,,2026-06-30
+mime_jr,Mime Jr.,,mr_mime,Mr. Mime,,normal,50,,,,,,,2026-06-30
+happiny,Happiny,,chansey,Chansey,,normal,25,,,,,,,2026-06-30
+gible,Gible,,gabite,Gabite,,normal,25,,,,,,,2026-06-30
+gabite,Gabite,,garchomp,Garchomp,,normal,100,,,,,,,2026-06-30
+munchlax,Munchlax,,snorlax,Snorlax,,normal,50,,,,,,,2026-06-30
+riolu,Riolu,,lucario,Lucario,,normal,50,,,,,,,2026-06-30
+hippopotas,Hippopotas,,hippowdon,Hippowdon,,normal,50,,,,,,,2026-06-30
+skorupi,Skorupi,,drapion,Drapion,,normal,50,,,,,,,2026-06-30
+croagunk,Croagunk,,toxicroak,Toxicroak,,normal,50,,,,,,,2026-06-30
+finneon,Finneon,,lumineon,Lumineon,,normal,50,,,,,,,2026-06-30
+mantyke,Mantyke,,mantine,Mantine,,normal,50,,,,,,,2026-06-30
+snover,Snover,,abomasnow,Abomasnow,,normal,50,,,,,,,2026-06-30
+snivy,Snivy,,servine,Servine,,normal,25,,,,,,,2026-06-30
+servine,Servine,,serperior,Serperior,,normal,100,,,,,,,2026-06-30
+tepig,Tepig,,pignite,Pignite,,normal,25,,,,,,,2026-06-30
+pignite,Pignite,,emboar,Emboar,,normal,100,,,,,,,2026-06-30
+oshawott,Oshawott,,dewott,Dewott,,normal,25,,,,,,,2026-06-30
+dewott,Dewott,,samurott,Samurott,,normal,100,,,,,,,2026-06-30
+patrat,Patrat,,watchog,Watchog,,normal,50,,,,,,,2026-06-30
+lillipup,Lillipup,,herdier,Herdier,,normal,25,,,,,,,2026-06-30
+herdier,Herdier,,stoutland,Stoutland,,normal,100,,,,,,,2026-06-30
+purrloin,Purrloin,,liepard,Liepard,,normal,50,,,,,,,2026-06-30
+pansage,Pansage,,simisage,Simisage,,normal,50,ITEM_GEN5_EVOLUTION_STONE,,,,,,2026-06-30
+pansear,Pansear,,simisear,Simisear,,normal,50,ITEM_GEN5_EVOLUTION_STONE,,,,,,2026-06-30
+panpour,Panpour,,simipour,Simipour,,normal,50,ITEM_GEN5_EVOLUTION_STONE,,,,,,2026-06-30
+munna,Munna,,musharna,Musharna,,normal,50,ITEM_GEN5_EVOLUTION_STONE,,,,,,2026-06-30
+pidove,Pidove,,tranquill,Tranquill,,normal,12,,,,,,,2026-06-30
+tranquill,Tranquill,,unfezant,Unfezant,,normal,50,,,,,,,2026-06-30
+blitzle,Blitzle,,zebstrika,Zebstrika,,normal,50,,,,,,,2026-06-30
+roggenrola,Roggenrola,,boldore,Boldore,,normal,50,,,,,,,2026-06-30
+boldore,Boldore,,gigalith,Gigalith,,normal,200,,,,,,,2026-06-30
+woobat,Woobat,,swoobat,Swoobat,,normal,50,,,,,,,2026-06-30
+drilbur,Drilbur,,excadrill,Excadrill,,normal,50,,,,,,,2026-06-30
+timburr,Timburr,,gurdurr,Gurdurr,,normal,50,,,,,,,2026-06-30
+gurdurr,Gurdurr,,conkeldurr,Conkeldurr,,normal,200,,,,,,,2026-06-30
+tympole,Tympole,,palpitoad,Palpitoad,,normal,25,,,,,,,2026-06-30
+palpitoad,Palpitoad,,seismitoad,Seismitoad,,normal,100,,,,,,,2026-06-30
+sewaddle,Sewaddle,,swadloon,Swadloon,,normal,25,,,,,,,2026-06-30
+swadloon,Swadloon,,leavanny,Leavanny,,normal,100,,,,,,,2026-06-30
+venipede,Venipede,,whirlipede,Whirlipede,,normal,25,,,,,,,2026-06-30
+whirlipede,Whirlipede,,scolipede,Scolipede,,normal,100,,,,,,,2026-06-30
+cottonee,Cottonee,,whimsicott,Whimsicott,,normal,50,ITEM_SUN_STONE,,,,,,2026-06-30
+petilil,Petilil,,lilligant,Lilligant,,normal,50,ITEM_SUN_STONE,,,,,,2026-06-30
+sandile,Sandile,,krokorok,Krokorok,,normal,25,,,,,,,2026-06-30
+krokorok,Krokorok,,krookodile,Krookodile,,normal,100,,,,,,,2026-06-30
+darumaka,Darumaka,,darmanitan,Darmanitan,,normal,50,,,,,,,2026-06-30
+darumaka_darumaka_galarian,Darumaka,Galarian,darmanitan_darmanitan_galarian_standard,Darmanitan,Galarian Standard,normal,50,,,,,,,2026-06-30
+dwebble,Dwebble,,crustle,Crustle,,normal,50,,,,,,,2026-06-30
+scraggy,Scraggy,,scrafty,Scrafty,,normal,50,,,,,,,2026-06-30
+yamask,Yamask,,cofagrigus,Cofagrigus,,normal,50,,,,,,,2026-06-30
+yamask_yamask_galarian,Yamask,Galarian,runerigus,Runerigus,,normal,50,,,,,,,2026-06-30
+tirtouga,Tirtouga,,carracosta,Carracosta,,normal,50,,,,,,,2026-06-30
+archen,Archen,,archeops,Archeops,,normal,50,,,,,,,2026-06-30
+trubbish,Trubbish,,garbodor,Garbodor,,normal,50,,,,,,,2026-06-30
+zorua,Zorua,,zoroark,Zoroark,,normal,50,,,,,,,2026-06-30
+zorua_zorua_hisuian,Zorua,Hisuian,zoroark_zoroark_hisuian,Zoroark,Hisuian,normal,50,,,,,,,2026-06-30
+minccino,Minccino,,cinccino,Cinccino,,normal,50,ITEM_GEN5_EVOLUTION_STONE,,,,,,2026-06-30
+gothita,Gothita,,gothorita,Gothorita,,normal,25,,,,,,,2026-06-30
+gothorita,Gothorita,,gothitelle,Gothitelle,,normal,100,,,,,,,2026-06-30
+solosis,Solosis,,duosion,Duosion,,normal,25,,,,,,,2026-06-30
+duosion,Duosion,,reuniclus,Reuniclus,,normal,100,,,,,,,2026-06-30
+ducklett,Ducklett,,swanna,Swanna,,normal,50,,,,,,,2026-06-30
+vanillite,Vanillite,,vanillish,Vanillish,,normal,25,,,,,,,2026-06-30
+vanillish,Vanillish,,vanilluxe,Vanilluxe,,normal,100,,,,,,,2026-06-30
+deerling_deerling_autumn,Deerling,Autumn,sawsbuck,Sawsbuck,,normal,50,,,,,,,2026-06-30
+deerling_deerling_spring,Deerling,Spring,sawsbuck,Sawsbuck,,normal,50,,,,,,,2026-06-30
+deerling_deerling_summer,Deerling,Summer,sawsbuck,Sawsbuck,,normal,50,,,,,,,2026-06-30
+deerling_deerling_winter,Deerling,Winter,sawsbuck,Sawsbuck,,normal,50,,,,,,,2026-06-30
+karrablast,Karrablast,,escavalier,Escavalier,,normal,200,,,,,,,2026-06-30
+foongus,Foongus,,amoonguss,Amoonguss,,normal,50,,,,,,,2026-06-30
+frillish,Frillish,,jellicent,Jellicent,,normal,50,,,,,,,2026-06-30
+frillish_frillish_female,Frillish,Female,jellicent,Jellicent,,normal,50,,,,,,,2026-06-30
+joltik,Joltik,,galvantula,Galvantula,,normal,50,,,,,,,2026-06-30
+ferroseed,Ferroseed,,ferrothorn,Ferrothorn,,normal,50,,,,,,,2026-06-30
+klink,Klink,,klang,Klang,,normal,25,,,,,,,2026-06-30
+klang,Klang,,klinklang,Klinklang,,normal,100,,,,,,,2026-06-30
+tynamo,Tynamo,,eelektrik,Eelektrik,,normal,25,,,,,,,2026-06-30
+eelektrik,Eelektrik,,eelektross,Eelektross,,normal,100,ITEM_GEN5_EVOLUTION_STONE,,,,,,2026-06-30
+elgyem,Elgyem,,beheeyem,Beheeyem,,normal,50,,,,,,,2026-06-30
+litwick,Litwick,,lampent,Lampent,,normal,25,,,,,,,2026-06-30
+lampent,Lampent,,chandelure,Chandelure,,normal,100,ITEM_GEN5_EVOLUTION_STONE,,,,,,2026-06-30
+axew,Axew,,fraxure,Fraxure,,normal,25,,,,,,,2026-06-30
+fraxure,Fraxure,,haxorus,Haxorus,,normal,100,,,,,,,2026-06-30
+cubchoo,Cubchoo,,beartic,Beartic,,normal,50,,,,,,,2026-06-30
+shelmet,Shelmet,,accelgor,Accelgor,,normal,200,,,,,,,2026-06-30
+mienfoo,Mienfoo,,mienshao,Mienshao,,normal,50,,,,,,,2026-06-30
+golett,Golett,,golurk,Golurk,,normal,50,,,,,,,2026-06-30
+pawniard,Pawniard,,bisharp,Bisharp,,normal,50,,,,,,,2026-06-30
+bisharp,Bisharp,,kingambit,Kingambit,,normal,100,,,,,,,2026-06-30
+rufflet,Rufflet,,braviary,Braviary,,normal,50,,,,,,,2026-06-30
+vullaby,Vullaby,,mandibuzz,Mandibuzz,,normal,50,,,,,,,2026-06-30
+deino,Deino,,zweilous,Zweilous,,normal,25,,,,,,,2026-06-30
+zweilous,Zweilous,,hydreigon,Hydreigon,,normal,100,,,,,,,2026-06-30
+larvesta,Larvesta,,volcarona,Volcarona,,normal,400,,,,,,,2026-06-30
+chespin,Chespin,,quilladin,Quilladin,,normal,25,,,,,,,2026-06-30
+quilladin,Quilladin,,chesnaught,Chesnaught,,normal,100,,,,,,,2026-06-30
+fennekin,Fennekin,,braixen,Braixen,,normal,25,,,,,,,2026-06-30
+braixen,Braixen,,delphox,Delphox,,normal,100,,,,,,,2026-06-30
+froakie,Froakie,,frogadier,Frogadier,,normal,25,,,,,,,2026-06-30
+frogadier,Frogadier,,greninja,Greninja,,normal,100,,,,,,,2026-06-30
+bunnelby,Bunnelby,,diggersby,Diggersby,,normal,50,,,,,,,2026-06-30
+fletchling,Fletchling,,fletchinder,Fletchinder,,normal,25,,,,,,,2026-06-30
+fletchinder,Fletchinder,,talonflame,Talonflame,,normal,100,,,,,,,2026-06-30
+scatterbug,Scatterbug,,spewpa,Spewpa,,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_archipelago,Scatterbug,Archipelago,spewpa_spewpa_archipelago,Spewpa,Archipelago,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_continental,Scatterbug,Continental,spewpa_spewpa_continental,Spewpa,Continental,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_elegant,Scatterbug,Elegant,spewpa_spewpa_elegant,Spewpa,Elegant,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_fancy,Scatterbug,Fancy,spewpa_spewpa_fancy,Spewpa,Fancy,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_garden,Scatterbug,Garden,spewpa_spewpa_garden,Spewpa,Garden,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_high_plains,Scatterbug,High Plains,spewpa_spewpa_high_plains,Spewpa,High Plains,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_icy_snow,Scatterbug,Icy Snow,spewpa_spewpa_icy_snow,Spewpa,Icy Snow,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_jungle,Scatterbug,Jungle,spewpa_spewpa_jungle,Spewpa,Jungle,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_marine,Scatterbug,Marine,spewpa_spewpa_marine,Spewpa,Marine,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_meadow,Scatterbug,Meadow,spewpa_spewpa_meadow,Spewpa,Meadow,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_modern,Scatterbug,Modern,spewpa_spewpa_modern,Spewpa,Modern,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_monsoon,Scatterbug,Monsoon,spewpa_spewpa_monsoon,Spewpa,Monsoon,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_ocean,Scatterbug,Ocean,spewpa_spewpa_ocean,Spewpa,Ocean,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_pokeball,Scatterbug,Pokeball,spewpa_spewpa_pokeball,Spewpa,Pokeball,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_polar,Scatterbug,Polar,spewpa_spewpa_polar,Spewpa,Polar,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_river,Scatterbug,River,spewpa_spewpa_river,Spewpa,River,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_sandstorm,Scatterbug,Sandstorm,spewpa_spewpa_sandstorm,Spewpa,Sandstorm,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_savanna,Scatterbug,Savanna,spewpa_spewpa_savanna,Spewpa,Savanna,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_sun,Scatterbug,Sun,spewpa_spewpa_sun,Spewpa,Sun,normal,25,,,,,,,2026-06-30
+scatterbug_scatterbug_tundra,Scatterbug,Tundra,spewpa_spewpa_tundra,Spewpa,Tundra,normal,25,,,,,,,2026-06-30
+spewpa,Spewpa,,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_archipelago,Spewpa,Archipelago,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_continental,Spewpa,Continental,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_elegant,Spewpa,Elegant,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_fancy,Spewpa,Fancy,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_garden,Spewpa,Garden,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_high_plains,Spewpa,High Plains,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_icy_snow,Spewpa,Icy Snow,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_jungle,Spewpa,Jungle,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_marine,Spewpa,Marine,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_meadow,Spewpa,Meadow,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_modern,Spewpa,Modern,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_monsoon,Spewpa,Monsoon,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_ocean,Spewpa,Ocean,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_pokeball,Spewpa,Pokeball,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_polar,Spewpa,Polar,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_river,Spewpa,River,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_sandstorm,Spewpa,Sandstorm,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_savanna,Spewpa,Savanna,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_sun,Spewpa,Sun,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+spewpa_spewpa_tundra,Spewpa,Tundra,vivillon,Vivillon,,normal,100,,,,,,,2026-06-30
+litleo,Litleo,,pyroar,Pyroar,,normal,50,,,,,,,2026-06-30
+flabebe_flabebe_blue,Flabébé,Blue,floette_floette_blue,Floette,Blue,normal,25,,,,,,,2026-06-30
+flabebe_flabebe_orange,Flabébé,Orange,floette_floette_orange,Floette,Orange,normal,25,,,,,,,2026-06-30
+flabebe_flabebe_white,Flabébé,White,floette_floette_white,Floette,White,normal,25,,,,,,,2026-06-30
+flabebe_flabebe_yellow,Flabébé,Yellow,floette_floette_yellow,Floette,Yellow,normal,25,,,,,,,2026-06-30
+floette_florges_red,Floette,Florges Red,florges,Florges,,normal,100,,,,,,,2026-06-30
+floette_floette_blue,Floette,Blue,florges,Florges,,normal,100,,,,,,,2026-06-30
+floette_floette_orange,Floette,Orange,florges,Florges,,normal,100,,,,,,,2026-06-30
+floette_floette_white,Floette,White,florges_florges_white,Florges,White,normal,100,,,,,,,2026-06-30
+floette_floette_yellow,Floette,Yellow,florges,Florges,,normal,100,,,,,,,2026-06-30
+skiddo,Skiddo,,gogoat,Gogoat,,normal,50,,,,,,,2026-06-30
+pancham,Pancham,,pangoro,Pangoro,,normal,50,,,,,,,2026-06-30
+espurr,Espurr,,meowstic,Meowstic,,normal,50,,,,,,,2026-06-30
+espurr,Espurr,,meowstic_meowstic_female,Meowstic,Female,normal,50,,,,,,,2026-06-30
+honedge,Honedge,,doublade,Doublade,,normal,25,,,,,,,2026-06-30
+doublade,Doublade,,aegislash_aegislash_shield,Aegislash,Shield,normal,100,,,,,,,2026-06-30
+doublade_aegislash_shield,Doublade,Aegislash Shield,aegislash_aegislash_shield,Aegislash,Shield,normal,100,,,,,,,2026-06-30
+spritzee,Spritzee,,aromatisse,Aromatisse,,normal,50,,,,,,,2026-06-30
+swirlix,Swirlix,,slurpuff,Slurpuff,,normal,50,,,,,,,2026-06-30
+inkay,Inkay,,malamar,Malamar,,normal,50,,,,,,,2026-06-30
+binacle,Binacle,,barbaracle,Barbaracle,,normal,50,,,,,,,2026-06-30
+skrelp,Skrelp,,dragalge,Dragalge,,normal,50,,,,,,,2026-06-30
+clauncher,Clauncher,,clawitzer,Clawitzer,,normal,50,,,,,,,2026-06-30
+helioptile,Helioptile,,heliolisk,Heliolisk,,normal,50,ITEM_SUN_STONE,,,,,,2026-06-30
+tyrunt,Tyrunt,,tyrantrum,Tyrantrum,,normal,50,,,,,,,2026-06-30
+amaura,Amaura,,aurorus,Aurorus,,normal,50,,,,,,,2026-06-30
+goomy,Goomy,,sliggoo,Sliggoo,,normal,25,,,,,,,2026-06-30
+sliggoo,Sliggoo,,goodra,Goodra,,normal,100,,ITEM_TROY_DISK_RAINY,Requires lure,,,,2026-06-30
+phantump,Phantump,,trevenant,Trevenant,,normal,200,,,,,,,2026-06-30
+pumpkaboo_gourgeist_small,Pumpkaboo,Gourgeist Small,gourgeist,Gourgeist,,normal,200,,,,,,,2026-06-30
+pumpkaboo_pumpkaboo_average,Pumpkaboo,Average,gourgeist_gourgeist_average,Gourgeist,Average,normal,200,,,,,,,2026-06-30
+pumpkaboo_pumpkaboo_large,Pumpkaboo,Large,gourgeist_gourgeist_large,Gourgeist,Large,normal,200,,,,,,,2026-06-30
+pumpkaboo_pumpkaboo_super,Pumpkaboo,Super,gourgeist_gourgeist_super,Gourgeist,Super,normal,200,,,,,,,2026-06-30
+bergmite,Bergmite,,avalugg,Avalugg,,normal,50,,,,,,,2026-06-30
+noibat,Noibat,,noivern,Noivern,,normal,400,,,,,,,2026-06-30
+zygarde_zygarde_fifty_percent,Zygarde,Fifty Percent,zygarde_zygarde_complete,Zygarde,Complete,normal,,ITEM_BEANS,,,,,,2026-06-30
+zygarde_zygarde_ten_percent,Zygarde,Ten Percent,zygarde_zygarde_fifty_percent,Zygarde,Fifty Percent,normal,,ITEM_BEANS,,,,,,2026-06-30
+rowlet,Rowlet,,dartrix,Dartrix,,normal,25,,,,,,,2026-06-30
+dartrix,Dartrix,,decidueye,Decidueye,,normal,100,,,,,,,2026-06-30
+litten,Litten,,torracat,Torracat,,normal,25,,,,,,,2026-06-30
+torracat,Torracat,,incineroar,Incineroar,,normal,100,,,,,,,2026-06-30
+popplio,Popplio,,brionne,Brionne,,normal,25,,,,,,,2026-06-30
+brionne,Brionne,,primarina,Primarina,,normal,100,,,,,,,2026-06-30
+pikipek,Pikipek,,trumbeak,Trumbeak,,normal,25,,,,,,,2026-06-30
+trumbeak,Trumbeak,,toucannon,Toucannon,,normal,100,,,,,,,2026-06-30
+yungoos,Yungoos,,gumshoos,Gumshoos,,normal,50,,,,,,,2026-06-30
+grubbin,Grubbin,,charjabug,Charjabug,,normal,25,,,,,,,2026-06-30
+charjabug,Charjabug,,vikavolt,Vikavolt,,normal,100,,ITEM_TROY_DISK_MAGNETIC,Requires lure,,,,2026-06-30
+crabrawler,Crabrawler,,crabominable,Crabominable,,normal,50,,ITEM_TROY_DISK_GLACIAL,Requires lure,,,,2026-06-30
+cutiefly,Cutiefly,,ribombee,Ribombee,,normal,50,,,,,,,2026-06-30
+rockruff,Rockruff,,lycanroc_lycanroc_midday,Lycanroc,Midday,normal,50,,,,,,,2026-06-30
+rockruff,Rockruff,,lycanroc_lycanroc_midnight,Lycanroc,Midnight,normal,50,,,,,,,2026-06-30
+rockruff_lycanroc_midday,Rockruff,Lycanroc Midday,lycanroc_lycanroc_midday,Lycanroc,Midday,normal,50,,,,,,,2026-06-30
+rockruff_lycanroc_midday,Rockruff,Lycanroc Midday,lycanroc_lycanroc_midnight,Lycanroc,Midnight,normal,50,,,,,,,2026-06-30
+rockruff_rockruff_dusk,Rockruff,Dusk,lycanroc_lycanroc_dusk,Lycanroc,Dusk,normal,50,,,,,,,2026-06-30
+mareanie,Mareanie,,toxapex,Toxapex,,normal,50,,,,,,,2026-06-30
+mudbray,Mudbray,,mudsdale,Mudsdale,,normal,50,,,,,,,2026-06-30
+dewpider,Dewpider,,araquanid,Araquanid,,normal,50,,,,,,,2026-06-30
+fomantis,Fomantis,,lurantis,Lurantis,,normal,50,,,,,,,2026-06-30
+morelull,Morelull,,shiinotic,Shiinotic,,normal,50,,,,,,,2026-06-30
+salandit,Salandit,,salazzle,Salazzle,,normal,50,,,,,,,2026-06-30
+stufful,Stufful,,bewear,Bewear,,normal,400,,,,,,,2026-06-30
+bounsweet,Bounsweet,,steenee,Steenee,,normal,25,,,,,,,2026-06-30
+steenee,Steenee,,tsareena,Tsareena,,normal,100,,,,,,,2026-06-30
+wimpod,Wimpod,,golisopod,Golisopod,,normal,400,,,,,,,2026-06-30
+sandygast,Sandygast,,palossand,Palossand,,normal,50,,,,,,,2026-06-30
+type_null,Type: Null,,silvally,Silvally,,normal,200,,,,,,,2026-06-30
+jangmo_o,Jangmo-o,,hakamo_o,Hakamo-o,,normal,25,,,,,,,2026-06-30
+hakamo_o,Hakamo-o,,kommo_o,Kommo-o,,normal,100,,,,,,,2026-06-30
+cosmog,Cosmog,,cosmoem,Cosmoem,,normal,25,,,,,,,2026-06-30
+cosmoem,Cosmoem,,solgaleo,Solgaleo,,normal,100,,,,,,,2026-06-30
+cosmoem,Cosmoem,,lunala,Lunala,,normal,100,,,,,,,2026-06-30
+poipole,Poipole,,naganadel,Naganadel,,normal,200,,,,,,,2026-06-30
+meltan,Meltan,,melmetal,Melmetal,,normal,400,,,,,,,2026-06-30
+grookey,Grookey,,thwackey,Thwackey,,normal,25,,,,,,,2026-06-30
+thwackey,Thwackey,,rillaboom,Rillaboom,,normal,100,,,,,,,2026-06-30
+scorbunny,Scorbunny,,raboot,Raboot,,normal,25,,,,,,,2026-06-30
+raboot,Raboot,,cinderace,Cinderace,,normal,100,,,,,,,2026-06-30
+sobble,Sobble,,drizzile,Drizzile,,normal,25,,,,,,,2026-06-30
+drizzile,Drizzile,,inteleon,Inteleon,,normal,100,,,,,,,2026-06-30
+skwovet,Skwovet,,greedent,Greedent,,normal,50,,,,,,,2026-06-30
+rookidee,Rookidee,,corvisquire,Corvisquire,,normal,25,,,,,,,2026-06-30
+corvisquire,Corvisquire,,corviknight,Corviknight,,normal,100,,,,,,,2026-06-30
+blipbug,Blipbug,,dottler,Dottler,,normal,25,,,,,,,2026-06-30
+dottler,Dottler,,orbeetle,Orbeetle,,normal,100,,,,,,,2026-06-30
+nickit,Nickit,,thievul,Thievul,,normal,50,,,,,,,2026-06-30
+gossifleur,Gossifleur,,eldegoss,Eldegoss,,normal,50,,,,,,,2026-06-30
+wooloo,Wooloo,,dubwool,Dubwool,,normal,50,,,,,,,2026-06-30
+chewtle,Chewtle,,drednaw,Drednaw,,normal,50,,,,,,,2026-06-30
+yamper,Yamper,,boltund,Boltund,,normal,50,,,,,,,2026-06-30
+rolycoly,Rolycoly,,carkol,Carkol,,normal,25,,,,,,,2026-06-30
+carkol,Carkol,,coalossal,Coalossal,,normal,100,,,,,,,2026-06-30
+applin,Applin,,appletun,Appletun,,normal,200,ITEM_OTHER_EVOLUTION_STONE_MAPLE_A,,,,,,2026-06-30
+applin,Applin,,flapple,Flapple,,normal,200,ITEM_OTHER_EVOLUTION_STONE_MAPLE_B,,,,,,2026-06-30
+applin,Applin,,dipplin,Dipplin,,normal,200,ITEM_OTHER_EVOLUTION_STONE_MAPLE_C,,,,,,2026-06-30
+silicobra,Silicobra,,sandaconda,Sandaconda,,normal,50,,,,,,,2026-06-30
+arrokuda,Arrokuda,,barraskewda,Barraskewda,,normal,50,,,,,,,2026-06-30
+toxel,Toxel,,toxtricity,Toxtricity,,normal,400,,,,,,,2026-06-30
+sizzlipede,Sizzlipede,,centiskorch,Centiskorch,,normal,50,,,,,,,2026-06-30
+clobbopus,Clobbopus,,grapploct,Grapploct,,normal,50,,,,,,,2026-06-30
+sinistea,Sinistea,,polteageist,Polteageist,,normal,50,,,,,,,2026-06-30
+sinistea_sinistea_antique,Sinistea,Antique,polteageist,Polteageist,,normal,400,,,,,,,2026-06-30
+sinistea_sinistea_phony,Sinistea,Phony,polteageist,Polteageist,,normal,50,,,,,,,2026-06-30
+hatenna,Hatenna,,hattrem,Hattrem,,normal,25,,,,,,,2026-06-30
+hattrem,Hattrem,,hatterene,Hatterene,,normal,100,,,,,,,2026-06-30
+impidimp,Impidimp,,morgrem,Morgrem,,normal,25,,,,,,,2026-06-30
+morgrem,Morgrem,,grimmsnarl,Grimmsnarl,,normal,100,,,,,,,2026-06-30
+milcery,Milcery,,alcremie,Alcremie,,normal,50,,,,,,,2026-06-30
+snom,Snom,,frosmoth,Frosmoth,,normal,400,,,,,,,2026-06-30
+cufant,Cufant,,copperajah,Copperajah,,normal,50,,,,,,,2026-06-30
+dreepy,Dreepy,,drakloak,Drakloak,,normal,25,,,,,,,2026-06-30
+drakloak,Drakloak,,dragapult,Dragapult,,normal,100,,,,,,,2026-06-30
+kubfu,Kubfu,,urshifu_urshifu_single_strike,Urshifu,Single Strike,normal,200,,,,,,,2026-06-30
+kubfu,Kubfu,,urshifu_urshifu_rapid_strike,Urshifu,Rapid Strike,normal,200,,,,,,,2026-06-30
+sprigatito,Sprigatito,,floragato,Floragato,,normal,25,,,,,,,2026-06-30
+floragato,Floragato,,meowscarada,Meowscarada,,normal,100,,,,,,,2026-06-30
+fuecoco,Fuecoco,,crocalor,Crocalor,,normal,25,,,,,,,2026-06-30
+crocalor,Crocalor,,skeledirge,Skeledirge,,normal,100,,,,,,,2026-06-30
+quaxly,Quaxly,,quaxwell,Quaxwell,,normal,25,,,,,,,2026-06-30
+quaxwell,Quaxwell,,quaquaval,Quaquaval,,normal,100,,,,,,,2026-06-30
+lechonk,Lechonk,,oinkologne,Oinkologne,,normal,50,,,,,,,2026-06-30
+lechonk,Lechonk,,oinkologne_oinkologne_female,Oinkologne,Female,normal,50,,,,,,,2026-06-30
+tarountula,Tarountula,,spidops,Spidops,,normal,50,,,,,,,2026-06-30
+nymble,Nymble,,lokix,Lokix,,normal,50,,,,,,,2026-06-30
+pawmi,Pawmi,,pawmo,Pawmo,,normal,25,,,,,,,2026-06-30
+pawmo,Pawmo,,pawmot,Pawmot,,normal,100,,,,,,,2026-06-30
+tandemaus,Tandemaus,,maushold,Maushold,,normal,50,,,,,,,2026-06-30
+fidough,Fidough,,dachsbun,Dachsbun,,normal,50,,,,,,,2026-06-30
+smoliv,Smoliv,,dolliv,Dolliv,,normal,25,,,,,,,2026-06-30
+dolliv,Dolliv,,arboliva,Arboliva,,normal,100,,,,,,,2026-06-30
+nacli,Nacli,,naclstack,Naclstack,,normal,25,,,,,,,2026-06-30
+naclstack,Naclstack,,garganacl,Garganacl,,normal,100,,,,,,,2026-06-30
+charcadet,Charcadet,,armarouge,Armarouge,,normal,50,,,,,,,2026-06-30
+charcadet,Charcadet,,ceruledge,Ceruledge,,normal,50,,,,,,,2026-06-30
+tadbulb,Tadbulb,,bellibolt,Bellibolt,,normal,50,,,,,,,2026-06-30
+wattrel,Wattrel,,kilowattrel,Kilowattrel,,normal,50,,,,,,,2026-06-30
+maschiff,Maschiff,,mabosstiff,Mabosstiff,,normal,50,,,,,,,2026-06-30
+shroodle,Shroodle,,grafaiai,Grafaiai,,normal,50,,,,,,,2026-06-30
+bramblin,Bramblin,,brambleghast,Brambleghast,,normal,50,,,,,,,2026-06-30
+toedscool,Toedscool,,toedscruel,Toedscruel,,normal,50,,,,,,,2026-06-30
+capsakid,Capsakid,,scovillain,Scovillain,,normal,50,,,,,,,2026-06-30
+rellor,Rellor,,rabsca,Rabsca,,normal,50,,,,,,,2026-06-30
+flittle,Flittle,,espathra,Espathra,,normal,50,,,,,,,2026-06-30
+tinkatink,Tinkatink,,tinkatuff,Tinkatuff,,normal,25,,,,,,,2026-06-30
+tinkatuff,Tinkatuff,,tinkaton,Tinkaton,,normal,100,,,,,,,2026-06-30
+wiglett,Wiglett,,wugtrio,Wugtrio,,normal,50,,,,,,,2026-06-30
+finizen,Finizen,,palafin,Palafin,,normal,50,,,,,,,2026-06-30
+varoom,Varoom,,revavroom,Revavroom,,normal,50,,,,,,,2026-06-30
+glimmet,Glimmet,,glimmora,Glimmora,,normal,50,,,,,,,2026-06-30
+greavard,Greavard,,houndstone,Houndstone,,normal,50,,,,,,,2026-06-30
+cetoddle,Cetoddle,,cetitan,Cetitan,,normal,50,,,,,,,2026-06-30
+frigibax,Frigibax,,arctibax,Arctibax,,normal,25,,,,,,,2026-06-30
+arctibax,Arctibax,,baxcalibur,Baxcalibur,,normal,100,,,,,,,2026-06-30
+gimmighoul,Gimmighoul,,gholdengo,Gholdengo,,normal,,ITEM_OTHER_EVOLUTION_STONE_A,,,,,,2026-06-30
+dipplin,Dipplin,,hydrapple,Hydrapple,,normal,400,,,,,,,2026-06-30
+poltchageist_sinistcha_unremarkable,Poltchageist,Sinistcha Unremarkable,sinistcha,Sinistcha,,normal,50,,,,,,,2026-06-30
+poltchageist_poltchageist_artisan,Poltchageist,Artisan,sinistcha,Sinistcha,,normal,400,,,,,,,2026-06-30
+venusaur,Venusaur,,venusaur_mega,Venusaur,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+charizard,Charizard,,charizard_mega_x,Charizard,Mega X,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+charizard,Charizard,,charizard_mega_y,Charizard,Mega Y,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+blastoise,Blastoise,,blastoise_mega,Blastoise,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+beedrill,Beedrill,,beedrill_mega,Beedrill,Mega,mega,,,,,100,20,Temporary Mega/Primal evolution,2026-06-30
+pidgeot,Pidgeot,,pidgeot_mega,Pidgeot,Mega,mega,,,,,100,20,Temporary Mega/Primal evolution,2026-06-30
+alakazam,Alakazam,,alakazam_mega,Alakazam,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+victreebel,Victreebel,,victreebel_mega,Victreebel,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+slowbro,Slowbro,,slowbro_mega,Slowbro,Mega,mega,,,,,100,20,Temporary Mega/Primal evolution,2026-06-30
+gengar,Gengar,,gengar_mega,Gengar,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+kangaskhan,Kangaskhan,,kangaskhan_mega,Kangaskhan,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+pinsir,Pinsir,,pinsir_mega,Pinsir,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+gyarados,Gyarados,,gyarados_mega,Gyarados,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+aerodactyl,Aerodactyl,,aerodactyl_mega,Aerodactyl,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+dragonite,Dragonite,,dragonite_mega,Dragonite,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+ampharos,Ampharos,,ampharos_mega,Ampharos,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+steelix,Steelix,,steelix_mega,Steelix,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+scizor,Scizor,,scizor_mega,Scizor,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+heracross,Heracross,,heracross_mega,Heracross,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+houndoom,Houndoom,,houndoom_mega,Houndoom,Mega,mega,,,,,100,20,Temporary Mega/Primal evolution,2026-06-30
+tyranitar,Tyranitar,,tyranitar_mega,Tyranitar,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+sceptile,Sceptile,,sceptile_mega,Sceptile,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+blaziken,Blaziken,,blaziken_mega,Blaziken,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+swampert,Swampert,,swampert_mega,Swampert,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+gardevoir,Gardevoir,,gardevoir_mega,Gardevoir,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+sableye,Sableye,,sableye_mega,Sableye,Mega,mega,,,,,100,20,Temporary Mega/Primal evolution,2026-06-30
+mawile,Mawile,,mawile_mega,Mawile,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+aggron,Aggron,,aggron_mega,Aggron,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+medicham,Medicham,,medicham_mega,Medicham,Mega,mega,,,,,100,20,Temporary Mega/Primal evolution,2026-06-30
+manectric,Manectric,,manectric_mega,Manectric,Mega,mega,,,,,100,20,Temporary Mega/Primal evolution,2026-06-30
+sharpedo,Sharpedo,,sharpedo_mega,Sharpedo,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+camerupt,Camerupt,,camerupt_mega,Camerupt,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+altaria,Altaria,,altaria_mega,Altaria,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+banette,Banette,,banette_mega,Banette,Mega,mega,,,,,100,20,Temporary Mega/Primal evolution,2026-06-30
+absol,Absol,,absol_mega,Absol,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+glalie,Glalie,,glalie_mega,Glalie,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+salamence,Salamence,,salamence_mega,Salamence,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+metagross,Metagross,,metagross_mega,Metagross,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+latias,Latias,,latias_mega,Latias,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+latios,Latios,,latios_mega,Latios,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+kyogre,Kyogre,,kyogre_primal,Kyogre,Primal,mega,,,,,400,80,Temporary Mega/Primal evolution,2026-06-30
+groudon,Groudon,,groudon_primal,Groudon,Primal,mega,,,,,400,80,Temporary Mega/Primal evolution,2026-06-30
+rayquaza,Rayquaza,,rayquaza_mega,Rayquaza,Mega,mega,,,,,400,80,Temporary Mega/Primal evolution,2026-06-30
+lopunny,Lopunny,,lopunny_mega,Lopunny,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+garchomp,Garchomp,,garchomp_mega,Garchomp,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+lucario,Lucario,,lucario_mega,Lucario,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+abomasnow,Abomasnow,,abomasnow_mega,Abomasnow,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+gallade,Gallade,,gallade_mega,Gallade,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+audino,Audino,,audino_mega,Audino,Mega,mega,,,,,200,40,Temporary Mega/Primal evolution,2026-06-30
+malamar,Malamar,,malamar_mega,Malamar,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
+diancie,Diancie,,diancie_mega,Diancie,Mega,mega,,,,,300,60,Temporary Mega/Primal evolution,2026-06-30
