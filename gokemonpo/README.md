@@ -1,3 +1,3 @@
-# Gokémon Po Evaluation Index
+# Gokémon Po Evaluation Index v1.7
 
-Pure ChatGPT slop
+By ChatGPT

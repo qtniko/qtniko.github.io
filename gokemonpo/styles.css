@@ -173,20 +173,50 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
   background: linear-gradient(135deg, rgba(52,211,153,.18), rgba(96,165,250,.10));
   box-shadow: 0 0 0 1px rgba(52,211,153,.16), 0 12px 30px rgba(52,211,153,.08);
 }
-.rating-kv.best-use em {
-  display: inline-flex;
-  margin-top: 8px;
-  padding: 3px 7px;
-  border-radius: 999px;
-  background: rgba(52,211,153,.16);
-  color: var(--accent-2);
-  font-size: .68rem;
-  font-style: normal;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-}
 .strength-grid { display: grid; gap: 12px; }
 .strength-grid h4 { margin: 0 0 8px; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
 .weak-chip { background: rgba(251,113,133,.10); color: var(--danger); }
 .resist-chip { background: rgba(52,211,153,.10); color: var(--accent-2); }
+
+
+.actions-inline { margin-top: 12px; }
+.actions-inline h4 { margin: 0 0 10px; color: var(--muted); font-size: .82rem; }
+.stab-muted { color: color-mix(in srgb, var(--muted) 72%, var(--bg)); font-weight: 700; }
+.strength-grid h4 { text-transform: none; letter-spacing: 0; font-size: .86rem; }
+
+/* v1.7 compact evolution chain */
+.mini-evo-chain {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .9rem;
+}
+.mini-evo-link {
+  all: unset;
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 850;
+  line-height: 1.2;
+}
+.mini-evo-link:hover { text-decoration: underline; }
+.mini-evo-link.current { color: var(--text); }
+.mini-evo-arrow {
+  color: var(--text);
+  font-weight: 900;
+}
+.mini-evo-unknown {
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-weight: 850;
+}
+.mini-evo-note {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: .9rem;
+  font-weight: 750;
+}

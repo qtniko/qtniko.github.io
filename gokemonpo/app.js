@@ -354,7 +354,7 @@ function renderResults() {
 function selectPokemon(id) { state.selectedId = id; renderResults(); renderDetail(state.byId.get(id)); }
 function ratingKv(label, rating, highlight=false) {
   const classes = `kv rating-kv ${ratingClass(rating)}${highlight ? ' best-use' : ''}`;
-  return `<div class="${classes}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(toTitle(rating))}</strong>${highlight ? '<em>Best use</em>' : ''}</div>`;
+  return `<div class="${classes}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(toTitle(rating))}</strong></div>`;
 }
 function highlightedUseKeys(p) {
   const entries = [
@@ -398,7 +398,7 @@ function chipList(values, emptyText, className='tag') {
 }
 function strengthsSection(p) {
   const profile = typeProfile(p);
-  return `<section class="section"><h3>Strengths & weaknesses</h3><div class="strength-grid"><div><h4>STAB good against</h4><div class="pill-row">${chipList(profile.goodAgainst, 'none', 'type-chip')}</div></div><div><h4>Weak to</h4><div class="pill-row">${chipList(profile.weak.map(multLabel), 'no weaknesses listed', 'weak-chip')}</div></div><div><h4>Resists</h4><div class="pill-row">${chipList(profile.resist.map(multLabel), 'no resistances listed', 'resist-chip')}</div></div></div></section>`;
+  return `<section class="section"><h3>Strengths & weaknesses</h3><div class="strength-grid"><div><h4>Good against <span class="stab-muted">(STAB)</span></h4><div class="pill-row">${chipList(profile.goodAgainst, 'none', 'type-chip')}</div></div><div><h4>Weak to</h4><div class="pill-row">${chipList(profile.weak.map(multLabel), 'no weaknesses listed', 'weak-chip')}</div></div><div><h4>Resists</h4><div class="pill-row">${chipList(profile.resist.map(multLabel), 'no resistances listed', 'resist-chip')}</div></div></div></section>`;
 }
 function legacyMoveText(p) {
   const value = String(p.legacy_move || '').trim();
@@ -409,6 +409,29 @@ function movesSection(p) {
   const legacy = legacyMoveText(p);
   return `<section class="section"><h3>Moves</h3><div class="move-grid"><div class="move-row"><span>PvE</span><strong>${escapeHtml(moveLine(p.best_fast_move_pve, p.best_charged_move_1_pve, p.best_charged_move_2_pve))}</strong></div><div class="move-row"><span>PvP</span><strong>${escapeHtml(moveLine(p.best_fast_move_pvp, p.best_charged_move_1_pvp, p.best_charged_move_2_pvp))}</strong></div>${legacy ? `<div class="move-row"><span>Legacy</span><strong>${escapeHtml(legacy)}</strong></div>` : ''}</div>${p.recommended_wait_reason ? `<p class="note">${escapeHtml(p.recommended_wait_reason)}</p>` : ''}</section>`;
 }
+function actionsSection(p) {
+  return `<section class="section"><h3>Actions</h3><div class="kv-grid">${kv('Bad stats', p.bad_stats_action || '—')}${kv('Good stats', p.good_stats_action || '—')}${kv('Storage priority', p.storage_priority || '—')}${kv('Trade value', p.trade_value || '—')}${kv('Evolve priority', p.evolve_priority || '—')}${kv('Power priority', p.power_up_priority || '—')}</div></section>`;
+}
+function evolutionDisplayName(row, fallbackId) {
+  if (!row) return fallbackId || '?';
+  return row.display_name || (row.form ? `${row.form} ${row.pokemon}` : row.pokemon) || fallbackId || '?';
+}
+function evoChainButton(row, isCurrent=false) {
+  if (!row) return '<span class="mini-evo-unknown">?</span>';
+  return `<button type="button" class="mini-evo-link${isCurrent ? ' current' : ''}" data-jump-id="${escapeHtml(row.id)}">${escapeHtml(evolutionDisplayName(row, row.id))}</button>`;
+}
+function compactEvolutionChain(p) {
+  const incoming = state.evolutions.filter(e => e.to_id === p.id);
+  const outgoing = state.evolutions.filter(e => e.from_id === p.id);
+  const parts = [];
+  if (incoming.length === 1) parts.push(evoChainButton(state.byId.get(incoming[0].from_id)));
+  else if (incoming.length > 1) parts.push('<span class="mini-evo-unknown">?</span>');
+  parts.push(evoChainButton(p, true));
+  if (outgoing.length === 1) parts.push(evoChainButton(state.byId.get(outgoing[0].to_id)));
+  else if (outgoing.length > 1) parts.push('<span class="mini-evo-unknown">?</span>');
+  if (parts.length === 1) return '<p class="mini-evo-note">No evolutions</p>';
+  return `<div class="mini-evo-chain">${parts.map((part, index) => `${index ? '<span class="mini-evo-arrow">→</span>' : ''}${part}`).join('')}</div>`;
+}
 function renderDetail(p) {
   if (!p) return;
   const family = state.byFamily.get(p.evolution_family) || []; const familyIds = new Set(family.map(member => member.id));
@@ -416,19 +439,19 @@ function renderDetail(p) {
   const flags = flagTerms(p).filter((v,i,a)=>a.indexOf(v)===i);
   dom.detail.innerHTML = `
     <div class="detail-head">
-      <div class="detail-title-row"><div><h2 class="detail-title">${escapeHtml(p.display_name)}</h2><p class="detail-subtitle">#${escapeHtml(p.dex_number || '—')} • ${escapeHtml(p.stage_display || toTitle(p.stage || 'unknown'))} • ${escapeHtml(p.evolution_family || 'No family')}</p></div><span class="rating-badge ${ratingClass(p.primary_rating)}">${escapeHtml(toTitle(p.primary_rating))}</span></div>
+      <div class="detail-title-row"><div><h2 class="detail-title">${escapeHtml(p.display_name)}</h2><p class="detail-subtitle">#${escapeHtml(p.dex_number || '—')} • ${escapeHtml(p.stage_display || toTitle(p.stage || 'unknown'))} • ${escapeHtml(p.evolution_family || 'No family')}</p>${compactEvolutionChain(p)}</div><span class="rating-badge ${ratingClass(p.primary_rating)}">${escapeHtml(toTitle(p.primary_rating))}</span></div>
       <div class="pill-row">${[p.type_1, p.type_2].filter(Boolean).map(type => chipHtml(type, 'type-chip')).join('')}</div>
       ${flags.length ? `<div class="pill-row">${flags.map(f => chipHtml(f, 'flag-chip')).join('')}</div>` : ''}
     </div>
     <section class="section"><h3>Base stats</h3><div class="kv-grid">${kv('Attack', p.base_attack || '—')}${kv('Defense', p.base_defense || '—')}${kv('Stamina', p.base_stamina || '—')}${kv('Estimated max CP', p.max_cp_estimate || '—')}</div></section>
-    ${strengthsSection(p)}
     <section class="section"><h3>Ratings</h3>${ratingsGrid(p)}</section>
-    <section class="section"><h3>Actions</h3><div class="kv-grid">${kv('Bad stats', p.bad_stats_action || '—')}${kv('Good stats', p.good_stats_action || '—')}${kv('Storage priority', p.storage_priority || '—')}${kv('Trade value', p.trade_value || '—')}${kv('Evolve priority', p.evolve_priority || '—')}${kv('Power priority', p.power_up_priority || '—')}</div></section>
-    <section class="section"><h3>Main uses</h3><div class="pill-row">${p.main_uses_list.length ? p.main_uses_list.map(use => chipHtml(use, 'tag')).join('') : chipHtml('none tagged', 'tag')}</div></section>
+    ${strengthsSection(p)}
     ${movesSection(p)}
+    <section class="section"><h3>Main uses</h3><div class="pill-row">${p.main_uses_list.length ? p.main_uses_list.map(use => chipHtml(use, 'tag')).join('') : chipHtml('none tagged', 'tag')}</div></section>
+    ${actionsSection(p)}
     <section class="section"><h3>Evolution family</h3><div class="family-list">${family.map(member => `<div class="family-item"><button type="button" data-jump-id="${escapeHtml(member.id)}">${escapeHtml(member.display_name)}</button><div class="family-meta">${escapeHtml(member.stage_display || toTitle(member.stage))} • ${escapeHtml(member.type_label)} • ${escapeHtml(toTitle(member.primary_rating))} • ${escapeHtml(member.good_stats_action || '—')}</div></div>`).join('') || '<p class="note">No family rows found.</p>'}</div></section>
     <section class="section"><h3>Evolution costs</h3><div class="evo-list">${evos.map(e => `<div class="evo-item"><strong>${escapeHtml(e.from_pokemon)}${e.from_form ? ` (${escapeHtml(e.from_form)})` : ''} → ${escapeHtml(e.to_pokemon)}${e.to_form ? ` (${escapeHtml(e.to_form)})` : ''}</strong><div class="evo-meta">${formatEvolutionCost(e)}</div></div>`).join('') || '<p class="note">No evolution-cost rows found.</p>'}</div></section>
-    <section class="section"><h3>Notes</h3><p class="note">${escapeHtml(p.notes || 'No notes yet.')}</p>${p.source_notes ? `<p class="note"><strong>Source notes:</strong> ${escapeHtml(p.source_notes)}</p>` : ''}${p.last_reviewed ? `<p class="note"><strong>Last reviewed:</strong> ${escapeHtml(p.last_reviewed)}</p>` : ''}</section>`;
+    <section class="section"><h3>GPT Notes</h3><p class="note">${escapeHtml(p.notes || 'No notes yet.')}</p>${p.source_notes ? `<p class="note"><strong>Source notes:</strong> ${escapeHtml(p.source_notes)}</p>` : ''}${p.last_reviewed ? `<p class="note"><strong>Last reviewed:</strong> ${escapeHtml(p.last_reviewed)}</p>` : ''}</section>`;
   dom.detail.querySelectorAll('[data-jump-id]').forEach(button => button.addEventListener('click', () => selectPokemon(button.dataset.jumpId)));
 }
 function formatEvolutionCost(e) { const parts=[]; if(e.evolution_kind)parts.push(toTitle(e.evolution_kind)); if(e.candy_cost)parts.push(`${e.candy_cost} candy`); if(e.item_required)parts.push(e.item_required); if(e.special_requirement)parts.push(e.special_requirement); if(e.walking_km_required)parts.push(`${e.walking_km_required} km walk`); if(e.buddy_requirement)parts.push(e.buddy_requirement); if(e.day_night_requirement)parts.push(e.day_night_requirement); if(e.lure_requirement)parts.push(`${e.lure_requirement} lure`); if(e.trade_evolution_discount)parts.push(`trade discount: ${e.trade_evolution_discount}`); if(e.random_evolution==='yes')parts.push('random evolution'); if(e.mega_energy_initial_cost)parts.push(`${e.mega_energy_initial_cost} initial Mega Energy`); if(e.mega_energy_subsequent_cost)parts.push(`${e.mega_energy_subsequent_cost} subsequent Mega Energy`); if(e.notes)parts.push(e.notes); return escapeHtml(parts.join(' • ') || 'No cost listed'); }
