@@ -504,12 +504,23 @@ function renderResults() {
 }
 
 
+
+function scrollToDetailWithGap() {
+  if (!dom.detail) return;
+  const resultsBottom = dom.results ? dom.results.getBoundingClientRect().bottom + window.scrollY : null;
+  const detailTop = dom.detail.getBoundingClientRect().top + window.scrollY;
+  const target = resultsBottom && resultsBottom < detailTop
+    ? Math.max(0, (resultsBottom + detailTop) / 2)
+    : Math.max(0, detailTop - 18);
+  window.scrollTo({ top: target, behavior: 'smooth' });
+}
+
 function selectPokemon(id, options = {}) {
   state.selectedId = id;
   renderResults();
   renderDetail(state.byId.get(id));
   if (options.fromCard && isVerticalViewport()) {
-    requestAnimationFrame(() => dom.detail.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    requestAnimationFrame(scrollToDetailWithGap);
   }
 }
 
@@ -789,7 +800,11 @@ function setFilterAccordion(collapsed) {
   dom.filtersToggle.setAttribute('aria-expanded', String(!collapsed));
 }
 function setInitialFilterAccordion() {
-  requestAnimationFrame(() => setFilterAccordion(isStackedLayout()));
+  if (!dom.controlsPanel) return;
+  dom.controlsPanel.classList.add('accordion-no-transition');
+  setFilterAccordion(isStackedLayout());
+  dom.controlsPanel.classList.add('accordion-initialized');
+  requestAnimationFrame(() => dom.controlsPanel.classList.remove('accordion-no-transition'));
 }
 function updateBackToTopVisibility() {
   if (!dom.backToTop || !dom.controlsPanel) return;

@@ -1072,3 +1072,23 @@ body {
 @media (max-width: 850px) {
   .app-grid { margin-top: 18px; }
 }
+
+/* v2.8: prevent visible accordion close animation on initial mobile/stacked load. */
+.controls.accordion-no-transition .filter-body,
+.controls.accordion-no-transition .accordion-arrow {
+  transition: none !important;
+}
+
+@media (max-width: 850px) {
+  .controls:not(.accordion-initialized) .filter-body {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: none !important;
+  }
+  .controls:not(.accordion-initialized) .accordion-arrow {
+    transform: rotate(-45deg);
+    transition: none !important;
+  }
+}
