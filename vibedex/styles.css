@@ -662,3 +662,413 @@ body {
 .controls {
   overscroll-behavior-y: contain !important;
 }
+
+
+/* v2.6 filter chip UI + mobile accordion */
+.stats-grid { display: none !important; }
+
+.controls {
+  display: grid;
+  gap: 14px;
+}
+
+.filters-toggle {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text);
+  font-size: 1.35rem;
+  font-weight: 850;
+  letter-spacing: -.03em;
+  line-height: 1.1;
+}
+
+.accordion-arrow {
+  width: .72em;
+  height: .72em;
+  display: inline-block;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform .22s ease, border-color .18s ease;
+  margin-top: -.15em;
+}
+.filters-collapsed .accordion-arrow {
+  transform: rotate(-45deg);
+}
+.filters-toggle:hover .accordion-arrow {
+  border-color: var(--accent);
+}
+
+.filter-body {
+  display: grid;
+  gap: 16px;
+  overflow: hidden;
+  transition: max-height .28s ease, opacity .2s ease, transform .22s ease;
+  max-height: 1200px;
+  opacity: 1;
+  transform: translateY(0);
+}
+.filters-collapsed .filter-body {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+}
+
+.filter-section {
+  display: grid;
+  gap: 8px;
+}
+.filter-section h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: .86rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+.filter-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+.filter-chip,
+.active-chip {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--text);
+  background: rgba(148,163,184,.12);
+  font-size: .78rem;
+  font-weight: 850;
+  line-height: 1;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+}
+.filter-chip:hover,
+.active-chip:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+}
+.active-filter-chip {
+  position: relative;
+  padding-right: 22px;
+}
+.active-filter-chip::after,
+.search-active-chip::after {
+  content: "×";
+  position: absolute;
+  right: 8px;
+  font-size: .82rem;
+  opacity: .65;
+}
+.search-active-chip {
+  position: relative;
+  padding-right: 24px;
+  background: rgba(96,165,250,.10);
+  color: var(--accent);
+}
+
+.muted-inline {
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.reset-button {
+  justify-self: start;
+  margin-top: 2px;
+}
+
+.toolbar {
+  align-items: flex-start;
+}
+.toolbar-left {
+  display: grid;
+  gap: 8px;
+  min-width: 180px;
+}
+.sort-field {
+  max-width: 260px;
+}
+.show-evolutions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: .86rem;
+  font-weight: 750;
+}
+.show-evolutions input {
+  width: auto;
+}
+.active-filter-row {
+  justify-content: flex-end;
+  align-items: flex-start;
+  max-width: min(100%, 760px);
+}
+
+/* Stage chips */
+.stage-chip { background: rgba(148,163,184,.12); color: var(--text); }
+.stage-baby { background: rgba(244,114,182,.16); color: #f9a8d4; border-color: rgba(244,114,182,.32); }
+.stage-base { background: rgba(203,213,225,.12); color: #cbd5e1; border-color: rgba(203,213,225,.24); }
+.stage-middle { background: rgba(168,85,247,.14); color: #c084fc; border-color: rgba(168,85,247,.30); }
+.stage-final { background: rgba(96,165,250,.15); color: #93c5fd; border-color: rgba(96,165,250,.32); }
+.stage-mega, .stage-primal { background: rgba(34,211,238,.15); color: #67e8f9; border-color: rgba(34,211,238,.35); }
+.stage-battle-form { background: rgba(129,140,248,.15); color: #a5b4fc; border-color: rgba(129,140,248,.32); }
+
+/* Use chips */
+.use-chip { border-color: var(--line); }
+.use-raid { background: rgba(251,113,53,.16); color: #fb923c; border-color: rgba(251,113,53,.34); }
+.use-gym-attack,
+.use-gym-defense { background: rgba(250,204,21,.18); color: #fde047; border-color: rgba(250,204,21,.36); }
+.use-league { background: rgba(163,230,53,.18); color: #bef264; border-color: rgba(163,230,53,.36); }
+.use-mega-attacker { background: rgba(59,130,246,.18); color: #60a5fa; border-color: rgba(59,130,246,.38); }
+.use-pokedex,
+.use-pokedex-collection { background: rgba(248,250,252,.14); color: #f8fafc; border-color: rgba(248,250,252,.32); }
+
+.back-to-top {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 40;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,.28);
+  background: color-mix(in srgb, var(--panel-strong) 82%, transparent);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px) scale(.96);
+  transition: opacity .18s ease, transform .18s ease, border-color .18s ease, background .18s ease;
+  backdrop-filter: blur(14px);
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+.back-to-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+.back-to-top:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--panel-strong) 94%, var(--accent) 6%);
+}
+
+@media (max-width: 850px) {
+  .filters-toggle {
+    font-size: 1.2rem;
+  }
+  .toolbar {
+    gap: 12px;
+  }
+  .active-filter-row {
+    justify-content: flex-start;
+    max-width: 100%;
+  }
+  .sort-field {
+    max-width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .filter-body,
+  .accordion-arrow,
+  .back-to-top {
+    transition: none !important;
+  }
+}
+
+/* v2.7 refinements */
+.app-grid {
+  margin-top: 18px;
+}
+
+.filters-toggle {
+  width: 100%;
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.filters-toggle .accordion-label {
+  min-width: 0;
+}
+.filters-toggle .accordion-arrow {
+  flex: 0 0 auto;
+  margin-left: auto;
+  margin-right: 2px;
+}
+
+/* Give glowing chips inside the filter panel enough breathing room without changing layout. */
+.controls .filter-chip-row {
+  padding: 5px 7px;
+  margin: -5px -7px;
+}
+
+/* Re-apply type and rating colors after the generic filter-chip styles. */
+.filter-chip.type-chip,
+.active-filter-chip.type-chip {
+  border-color: color-mix(in srgb, var(--type-color, var(--accent)) 52%, transparent) !important;
+  background: color-mix(in srgb, var(--type-color, var(--accent)) 18%, transparent) !important;
+  color: color-mix(in srgb, var(--type-color, var(--accent)) 64%, var(--text)) !important;
+}
+:root.light .filter-chip.type-chip,
+:root.light .active-filter-chip.type-chip {
+  color: color-mix(in srgb, var(--type-color, var(--accent)) 78%, #111827) !important;
+}
+
+.filter-chip.rating-bad,
+.active-filter-chip.rating-bad {
+  color: var(--danger) !important;
+  background: rgba(251,113,133,.10) !important;
+  border-color: rgba(251,113,133,.30) !important;
+}
+.filter-chip.rating-budget,
+.active-filter-chip.rating-budget,
+.filter-chip.rating-niche,
+.active-filter-chip.rating-niche {
+  color: var(--warning) !important;
+  background: rgba(251,191,36,.10) !important;
+  border-color: rgba(251,191,36,.30) !important;
+}
+.filter-chip.rating-decent,
+.active-filter-chip.rating-decent {
+  color: #38bdf8 !important;
+  background: rgba(56,189,248,.10) !important;
+  border-color: rgba(56,189,248,.30) !important;
+}
+.filter-chip.rating-strong,
+.active-filter-chip.rating-strong {
+  color: var(--accent-2) !important;
+  background: rgba(52,211,153,.10) !important;
+  border-color: rgba(52,211,153,.30) !important;
+}
+.filter-chip.rating-top-tier,
+.active-filter-chip.rating-top-tier {
+  color: var(--accent-2) !important;
+  background: rgba(52,211,153,.10) !important;
+  border-color: rgba(52,211,153,.92) !important;
+}
+
+/* Classic Pokédex red for the collection use chip. */
+.use-pokedex,
+.use-pokedex-collection {
+  background: rgba(239,68,68,.17) !important;
+  color: #f87171 !important;
+  border-color: rgba(239,68,68,.38) !important;
+}
+
+/* Custom app-style checkbox. */
+.check-label {
+  cursor: pointer;
+  user-select: none;
+}
+.check-label input {
+  position: absolute;
+  inline-size: 1px !important;
+  block-size: 1px !important;
+  opacity: 0;
+  pointer-events: none;
+}
+.custom-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  transition: border-color .15s ease, background .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+.custom-check::after {
+  content: "";
+  width: 8px;
+  height: 4px;
+  border-left: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(-45deg) translate(1px, -1px) scale(.65);
+  opacity: 0;
+  transition: opacity .12s ease, transform .12s ease;
+}
+.check-label:hover .custom-check {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.check-label input:checked + .custom-check {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 0 3px rgba(96,165,250,.14);
+}
+.check-label input:checked + .custom-check::after {
+  opacity: 1;
+  transform: rotate(-45deg) translate(1px, -1px) scale(1);
+}
+.check-label input:focus-visible + .custom-check {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(96,165,250,.18);
+}
+.show-evolutions input {
+  width: 1px !important;
+}
+
+/* Active top-tier chips need their X separate from the glow, since both use pseudo-elements. */
+.active-filter-chip.rating-top-tier {
+  padding-right: 24px;
+  overflow: visible !important;
+  isolation: isolate;
+}
+.active-filter-chip.rating-top-tier::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: -4px -6px -4px -4px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  background: rgba(52, 211, 153, .18) !important;
+  filter: blur(5px) !important;
+  opacity: .58 !important;
+  animation: none !important;
+  padding: 0 !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+}
+.active-filter-chip.rating-top-tier::after {
+  content: "×" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: auto 8px auto auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: auto !important;
+  height: auto !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  color: currentColor !important;
+  opacity: .76 !important;
+  font-size: .86rem !important;
+  line-height: 1 !important;
+  z-index: 2 !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+}
+
+@media (max-width: 850px) {
+  .app-grid { margin-top: 18px; }
+}

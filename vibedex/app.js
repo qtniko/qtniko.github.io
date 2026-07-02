@@ -45,15 +45,55 @@ const TYPE_CHART = {
   Fairy: { Fire: .5, Fighting: 2, Poison: .5, Dragon: 2, Dark: 2, Steel: .5 }
 };
 
-const state = { pokemon: [], evolutions: [], searchIndex: new Map(), byId: new Map(), byFamily: new Map(), filtered: [], selectedId: null, loadError: null };
+const state = {
+  pokemon: [],
+  evolutions: [],
+  searchIndex: new Map(),
+  exactTerms: new Set(),
+  byId: new Map(),
+  byFamily: new Map(),
+  filtered: [],
+  selectedId: null,
+  loadError: null,
+  filters: {
+    type: new Set(),
+    stage: new Set(),
+    rating: new Set(),
+    use: new Set()
+  },
+  filterOptions: {
+    type: [],
+    stage: [],
+    rating: [],
+    use: []
+  }
+};
 const el = id => document.getElementById(id);
 const dom = {
-  searchInput: el('searchInput'), typeFilter: el('typeFilter'), stageFilter: el('stageFilter'), ratingFilter: el('ratingFilter'),
-  useFilter: el('useFilter'), actionFilter: el('actionFilter'), storageFilter: el('storageFilter'), legacyOnly: el('legacyOnly'),
-  megaOnly: el('megaOnly'), shadowOnly: el('shadowOnly'), regionalOnly: el('regionalOnly'), sortSelect: el('sortSelect'),
-  resetFilters: el('resetFilters'), results: el('results'), detail: el('detail'), resultCount: el('resultCount'), dataStatus: el('dataStatus'),
-  activeFilters: el('activeFilters'), cardTemplate: el('resultCardTemplate'), loadPanel: el('loadPanel'), pokemonFile: el('pokemonFile'),
-  evolutionsFile: el('evolutionsFile'), loadUploaded: el('loadUploaded'), exportFiltered: el('exportFiltered'), themeToggle: el('themeToggle')
+  searchInput: el('searchInput'),
+  filterBody: el('filterBody'),
+  filtersToggle: el('filtersToggle'),
+  controlsPanel: el('controlsPanel'),
+  typeChips: el('typeChips'),
+  stageChips: el('stageChips'),
+  ratingChips: el('ratingChips'),
+  useChips: el('useChips'),
+  sortSelect: el('sortSelect'),
+  showEvolutions: el('showEvolutions'),
+  resetFilters: el('resetFilters'),
+  results: el('results'),
+  detail: el('detail'),
+  resultCount: el('resultCount'),
+  dataStatus: el('dataStatus'),
+  activeFilters: el('activeFilters'),
+  cardTemplate: el('resultCardTemplate'),
+  loadPanel: el('loadPanel'),
+  pokemonFile: el('pokemonFile'),
+  evolutionsFile: el('evolutionsFile'),
+  loadUploaded: el('loadUploaded'),
+  exportFiltered: el('exportFiltered'),
+  themeToggle: el('themeToggle'),
+  backToTop: el('backToTop')
 };
 
 function normalize(value) {
@@ -180,20 +220,41 @@ function deriveStages() {
   }
 }
 function stageSortValue(p) { return Math.min(...(p.stage_tags || [p.stage]).map(stage => STAGE_ORDER[stage] ?? 99)); }
+
+function exactTermsForRow(p) {
+  const terms = new Set();
+  const add = value => {
+    const term = normalize(value);
+    if (term) terms.add(term);
+  };
+  [p.form, p.variant_type, p.stage, p.stage_display, ...(p.stage_tags || []), p.type_1, p.type_2,
+    p.primary_rating, p.current_stage_rating, p.final_potential_rating,
+    p.best_fast_move_pve, p.best_charged_move_1_pve, p.best_charged_move_2_pve,
+    p.best_fast_move_pvp, p.best_charged_move_1_pvp, p.best_charged_move_2_pvp,
+    p.legacy_move
+  ].forEach(add);
+  flagTerms(p).forEach(add);
+  p.main_uses_list.forEach(use => {
+    add(use);
+    normalize(use).split(' ').forEach(part => add(part));
+  });
+  return terms;
+}
 function buildIndexes() {
-  state.byId.clear(); state.byFamily.clear(); state.searchIndex.clear();
+  state.byId.clear(); state.byFamily.clear(); state.searchIndex.clear(); state.exactTerms.clear();
   for (const p of state.pokemon) {
     state.byId.set(p.id, p);
     const family = p.evolution_family || 'Other';
     if (!state.byFamily.has(family)) state.byFamily.set(family, []);
     state.byFamily.get(family).push(p);
-    const blob = [p.id, p.dex_number, p.pokemon, p.form, p.variant_type, p.stage, p.stage_display, ...(p.stage_tags || []), p.evolution_family,
-      p.evolves_from, p.evolves_to, p.final_evolution_targets, p.mega_targets, p.type_1, p.type_2,
-      p.main_uses, p.current_stage_rating, p.final_potential_rating, p.raid_rating, p.gym_attack_rating, p.gym_defense_rating, p.league_rating,
+    const exactTerms = exactTermsForRow(p);
+    p.exact_terms = Array.from(exactTerms);
+    p.exact_term_set = exactTerms;
+    exactTerms.forEach(term => state.exactTerms.add(term));
+    const blob = [p.id, p.dex_number, p.pokemon, p.display_name, p.form, p.variant_type, p.stage, p.stage_display, ...(p.stage_tags || []), p.type_1, p.type_2,
       p.best_fast_move_pve, p.best_charged_move_1_pve, p.best_charged_move_2_pve,
       p.best_fast_move_pvp, p.best_charged_move_1_pvp, p.best_charged_move_2_pvp, p.legacy_move,
-      p.bad_stats_action, p.good_stats_action, p.storage_priority, p.trade_value, p.evolve_priority, p.power_up_priority,
-      p.recommended_wait_reason, ...flagTerms(p)
+      p.primary_rating, ...flagTerms(p)
     ].join(' ');
     p.search_blob = normalize(blob);
     state.searchIndex.set(p.id, p.search_blob);
@@ -202,18 +263,11 @@ function buildIndexes() {
     list.sort((a, b) => stageSortValue(a) - stageSortValue(b) || a.dex_number_num - b.dex_number_num || a.display_name.localeCompare(b.display_name));
   }
 }
-function fillSelect(select, values, allLabel, titleCase=true) {
-  const old = select.value;
-  select.innerHTML = `<option value="">${allLabel}</option>` + values.filter(Boolean).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(titleCase ? toTitle(v) : v)}</option>`).join('');
-  select.value = values.includes(old) ? old : '';
-}
-function populateFilters() {
-  fillSelect(dom.typeFilter, TYPE_ORDER.filter(type => state.pokemon.some(p => p.type_1 === type || p.type_2 === type)), 'All types');
-  fillSelect(dom.stageFilter, unique(state.pokemon.flatMap(p => p.stage_tags || [p.stage])).sort((a,b)=>(STAGE_ORDER[a]??99)-(STAGE_ORDER[b]??99)), 'All stages');
-  fillSelect(dom.ratingFilter, RATING_BANDS, 'All ratings');
-  fillSelect(dom.actionFilter, ACTIONS, 'All actions');
-  fillSelect(dom.storageFilter, unique(state.pokemon.map(p => p.storage_priority).filter(Boolean)).sort((a,b)=>(STORAGE_ORDER[b]??-1)-(STORAGE_ORDER[a]??-1)), 'All priorities');
-  dom.useFilter.innerHTML = '<option value="">All uses</option>' + USE_FILTERS.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+
+
+function useFilterLabel(value) {
+  const found = USE_FILTERS.find(([key]) => key === value);
+  return found ? found[1] : toTitle(value);
 }
 function useMatches(p, use) {
   if (!use) return true;
@@ -222,53 +276,126 @@ function useMatches(p, use) {
   if (use === 'gym attack') return ratingValue(p.gym_attack_rating) >= GOOD_RATING_MIN || uses.includes('gym attack');
   if (use === 'gym defense') return ratingValue(p.gym_defense_rating) >= GOOD_RATING_MIN || uses.includes('gym defense');
   if (use === 'league') return ratingValue(p.league_rating) >= GOOD_RATING_MIN || uses.includes('league');
-  return uses.includes(use);
+  return uses.includes(normalize(use));
 }
-function passesFilters(p) {
-  const type = dom.typeFilter.value, stage = dom.stageFilter.value, rating = dom.ratingFilter.value, use = dom.useFilter.value, action = dom.actionFilter.value, storage = dom.storageFilter.value;
-  if (type && p.type_1 !== type && p.type_2 !== type) return false;
-  if (stage && !(p.stage_tags || [p.stage]).includes(stage)) return false;
-  if (rating && ![p.primary_rating, p.current_stage_rating, p.final_potential_rating, p.raid_rating, p.gym_attack_rating, p.gym_defense_rating, p.league_rating].includes(rating)) return false;
-  if (!useMatches(p, use)) return false;
-  if (action && p.bad_stats_action !== action && p.good_stats_action !== action) return false;
-  if (storage && p.storage_priority !== storage) return false;
-  if (dom.legacyOnly.checked && p.needs_legacy_move !== 'yes') return false;
-  if (dom.megaOnly.checked && p.mega_relevant !== 'yes' && p.can_be_mega !== 'yes') return false;
-  if (dom.shadowOnly.checked && p.shadow_relevant !== 'yes' && p.variant_type !== 'shadow') return false;
-  if (dom.regionalOnly.checked && p.regional !== 'yes' && !p.form) return false;
+function selectedValues(group) {
+  return Array.from(state.filters[group] || []);
+}
+function filterPassesSet(valueOrValues, selected) {
+  if (!selected || !selected.size) return true;
+  const values = Array.isArray(valueOrValues) ? valueOrValues : [valueOrValues];
+  return values.some(value => selected.has(value));
+}
+function passesPanelFilters(p) {
+  if (!filterPassesSet([p.type_1, p.type_2].filter(Boolean), state.filters.type)) return false;
+  if (!filterPassesSet(p.stage_tags || [p.stage], state.filters.stage)) return false;
+  if (!filterPassesSet(p.primary_rating, state.filters.rating)) return false;
+  if (state.filters.use.size && !selectedValues('use').some(use => useMatches(p, use))) return false;
   return true;
 }
-function valueScore(p) { return ratingValue(p.primary_rating) * 12 + (STORAGE_ORDER[p.storage_priority] ?? 0) * 4 + (p.good_stats_action === 'keep' ? 8 : 0) + (p.bad_stats_action === 'trade' ? 7 : 0) + ((p.stage_tags || []).includes('mega') ? 5 : 0); }
-function parseSemanticSearch(query) {
-  const tokens = normalize(query).split(' ').filter(Boolean);
-  const requirements = new Set();
-  const skip = new Set();
-  const gymWords = new Set(['gym', 'gyms']);
-  const raidWords = new Set(['raid', 'raids']);
-  const leagueWords = new Set(['league', 'leagues']);
-  const attackWords = new Set(['attack', 'attacks', 'atk']);
-  const defenseWords = new Set(['defense', 'defence', 'def']);
-  for (let i = 0; i < tokens.length - 1; i++) {
-    const a = tokens[i], b = tokens[i + 1];
-    if ((gymWords.has(a) && attackWords.has(b)) || (attackWords.has(a) && gymWords.has(b))) {
-      requirements.add('gym_attack'); skip.add(i); skip.add(i + 1);
+function populateFilters() {
+  state.filterOptions.type = TYPE_ORDER.filter(type => state.pokemon.some(p => p.type_1 === type || p.type_2 === type));
+  state.filterOptions.stage = unique(state.pokemon.flatMap(p => p.stage_tags || [p.stage])).sort((a,b)=>(STAGE_ORDER[a]??99)-(STAGE_ORDER[b]??99));
+  state.filterOptions.rating = RATING_BANDS.slice();
+  state.filterOptions.use = USE_FILTERS.map(([value]) => value);
+  renderFilterChips();
+}
+function chipClassForFilter(group, value) {
+  if (group === 'type') return `type-chip ${typeClass(value)}`;
+  if (group === 'rating') return `rating-tag ${ratingClass(value)}`;
+  if (group === 'use') return `use-chip use-${normalize(value).replace(/[^a-z0-9]+/g, '-')}`;
+  if (group === 'stage') return `stage-chip stage-${normalize(value).replace(/[^a-z0-9]+/g, '-')}`;
+  return 'pill';
+}
+function labelForFilter(group, value) {
+  if (group === 'use') return useFilterLabel(value);
+  if (group === 'rating' || group === 'stage') return toTitle(value);
+  return value;
+}
+function makeFilterButton(group, value, active=false) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = `filter-chip ${chipClassForFilter(group, value)}${active ? ' active-filter-chip' : ''}`;
+  button.dataset.filterGroup = group;
+  button.dataset.filterValue = value;
+  button.textContent = labelForFilter(group, value);
+  button.title = active ? 'Remove filter' : 'Add filter';
+  return button;
+}
+function renderFilterChips() {
+  const groups = [
+    ['type', dom.typeChips],
+    ['stage', dom.stageChips],
+    ['rating', dom.ratingChips],
+    ['use', dom.useChips]
+  ];
+  for (const [group, container] of groups) {
+    if (!container) continue;
+    container.innerHTML = '';
+    const selected = state.filters[group];
+    const values = state.filterOptions[group] || [];
+    const fragment = document.createDocumentFragment();
+    values.filter(value => !selected.has(value)).forEach(value => fragment.append(makeFilterButton(group, value)));
+    if (!fragment.childNodes.length) {
+      const empty = document.createElement('span');
+      empty.className = 'muted-inline';
+      empty.textContent = 'All selected';
+      fragment.append(empty);
     }
-    if ((gymWords.has(a) && defenseWords.has(b)) || (defenseWords.has(a) && gymWords.has(b))) {
-      requirements.add('gym_defense'); skip.add(i); skip.add(i + 1);
-    }
+    container.append(fragment);
   }
-  const lexical = [];
-  tokens.forEach((token, i) => {
-    if (skip.has(i)) return;
-    if (gymWords.has(token)) { requirements.add('gym_any'); return; }
-    if (raidWords.has(token)) { requirements.add('raid'); return; }
-    if (leagueWords.has(token)) { requirements.add('league'); return; }
-    if (defenseWords.has(token)) { requirements.add('gym_defense'); return; }
-    if (attackWords.has(token)) { requirements.add('attack_any'); return; }
-    if (['good', 'useful', 'usefulness', 'for'].includes(token)) return;
-    lexical.push(token);
-  });
-  return { lexical, requirements: Array.from(requirements) };
+}
+function toggleFilter(group, value, force) {
+  const set = state.filters[group];
+  if (!set) return;
+  if (force === 'remove') set.delete(value);
+  else if (force === 'add') set.add(value);
+  else if (set.has(value)) set.delete(value);
+  else set.add(value);
+  renderFilterChips();
+  applyFilters();
+}
+function valueScore(p) {
+  return ratingValue(p.primary_rating) * 12 + (STORAGE_ORDER[p.storage_priority] ?? 0) * 4 + (p.good_stats_action === 'keep' ? 8 : 0) + (p.bad_stats_action === 'trade' ? 7 : 0) + ((p.stage_tags || []).includes('mega') ? 5 : 0);
+}
+function parseSemanticSearch(query) {
+  const rawTokens = normalize(query).split(' ').filter(Boolean);
+  const filler = new Set(['good', 'useful', 'usefulness', 'for', 'a', 'an', 'the', 'that', 'are', 'is', 'worth']);
+  const tokens = rawTokens.filter(token => !filler.has(token));
+  const requirements = new Set();
+  const exact = [];
+  const names = [];
+  const dex = [];
+  const takeSemantic = (i) => {
+    const a = tokens[i], b = tokens[i + 1];
+    if (!a) return 0;
+    if (a === 'gym' || a === 'gyms') {
+      if (b === 'attack' || b === 'atk') { requirements.add('gym_attack'); return 2; }
+      if (b === 'defense' || b === 'defence' || b === 'def') { requirements.add('gym_defense'); return 2; }
+      requirements.add('gym_any'); return 1;
+    }
+    if (a === 'raid' || a === 'raids') { requirements.add('raid'); return 1; }
+    if (a === 'league' || a === 'leagues') { requirements.add('league'); return 1; }
+    if (a === 'defense' || a === 'defence' || a === 'def') { requirements.add('gym_defense'); return 1; }
+    if (a === 'attack' || a === 'atk') { requirements.add('gym_attack'); return 1; }
+    return 0;
+  };
+  for (let i = 0; i < tokens.length;) {
+    let consumed = takeSemantic(i);
+    if (consumed) { i += consumed; continue; }
+    const token = tokens[i];
+    const numeric = token.replace(/^#/, '');
+    if (/^\d+$/.test(numeric)) { dex.push(numeric); i++; continue; }
+    let matched = '';
+    let matchedLen = 0;
+    for (let len = Math.min(4, tokens.length - i); len >= 1; len--) {
+      const phrase = tokens.slice(i, i + len).join(' ');
+      if (state.exactTerms.has(phrase)) { matched = phrase; matchedLen = len; break; }
+    }
+    if (matched) { exact.push(matched); i += matchedLen; continue; }
+    names.push(token); i++;
+  }
+  return { names, exact, dex, requirements: Array.from(requirements) };
 }
 function passesSemanticRequirements(p, requirements) {
   for (const requirement of requirements) {
@@ -277,7 +404,6 @@ function passesSemanticRequirements(p, requirements) {
     if (requirement === 'gym_defense' && ratingValue(p.gym_defense_rating) < GOOD_RATING_MIN) return false;
     if (requirement === 'league' && ratingValue(p.league_rating) < GOOD_RATING_MIN) return false;
     if (requirement === 'gym_any' && ratingValue(p.gym_attack_rating) < GOOD_RATING_MIN && ratingValue(p.gym_defense_rating) < GOOD_RATING_MIN) return false;
-    if (requirement === 'attack_any' && ratingValue(p.raid_rating) < GOOD_RATING_MIN && ratingValue(p.gym_attack_rating) < GOOD_RATING_MIN) return false;
   }
   return true;
 }
@@ -285,56 +411,76 @@ function scoreSearch(p, query) {
   if (!query) return valueScore(p);
   const parsed = parseSemanticSearch(query);
   if (!passesSemanticRequirements(p, parsed.requirements)) return -Infinity;
-  const q = normalize(query); const tokens = parsed.lexical; const blob = state.searchIndex.get(p.id) || '';
   let score = parsed.requirements.length ? 35 * parsed.requirements.length : 0;
-  const name = normalize(p.pokemon), display = normalize(p.display_name), id = normalize(p.id), family = normalize(p.evolution_family), dex = String(p.dex_number || '').trim();
-  const searchable = [blob, display, name, id, family, dex ? `#${dex}` : ''].join(' ');
-  for (const token of tokens) {
-    const isNumeric = /^\d+$/.test(token);
-    if (isNumeric) {
-      if (dex === token || dex.padStart(3, '0') === token.padStart(3, '0')) score += 120;
-      else return -Infinity;
-      continue;
-    }
-    if (!searchable.includes(token)) return -Infinity;
-    if (display === token || name === token || id === token) score += 110;
-    else if (display.startsWith(token) || name.startsWith(token)) score += 70;
-    else if (display.includes(token) || name.includes(token)) score += 45;
-    else if (family.includes(token)) score += 25;
-    else score += 8;
+  const name = normalize(p.pokemon), display = normalize(p.display_name), id = normalize(p.id), dexValue = String(p.dex_number || '').trim();
+  for (const term of parsed.dex) {
+    if (dexValue === term || dexValue.padStart(3, '0') === term.padStart(3, '0')) score += 120;
+    else return -Infinity;
   }
-  if (tokens.length && (id === q || display === q || name === q)) score += 180;
-  if (tokens.length && (display.startsWith(q) || name.startsWith(q))) score += 90;
-  if (tokens.length && (display.includes(q) || name.includes(q))) score += 55;
-  if (tokens.length && family.includes(q)) score += 25;
+  for (const term of parsed.exact) {
+    if (p.exact_term_set?.has(term)) score += 40;
+    else return -Infinity;
+  }
+  for (const term of parsed.names) {
+    if (display === term || name === term || id === term) score += 110;
+    else if (display.startsWith(term) || name.startsWith(term)) score += 70;
+    else if (display.includes(term) || name.includes(term)) score += 45;
+    else return -Infinity;
+  }
   return score + valueScore(p);
+}
+function includeEvolutionFamilies(rows, scoreMap) {
+  if (!dom.showEvolutions?.checked || !rows.length) return rows;
+  const familyScores = new Map();
+  rows.forEach(row => {
+    const score = scoreMap.get(row.id) ?? row.score ?? valueScore(row);
+    const current = familyScores.get(row.evolution_family) ?? -Infinity;
+    if (score > current) familyScores.set(row.evolution_family, score);
+  });
+  const byId = new Map(rows.map(row => [row.id, row]));
+  for (const p of state.pokemon) {
+    if (!familyScores.has(p.evolution_family) || byId.has(p.id)) continue;
+    byId.set(p.id, { ...p, score: familyScores.get(p.evolution_family) - 0.5 + valueScore(p) / 1000, filter_match_count: typeFilterMatchCount(p) });
+  }
+  return Array.from(byId.values());
+}
+function typeFilterMatchCount(p) {
+  if (!state.filters.type.size) return 0;
+  return [p.type_1, p.type_2].filter(type => state.filters.type.has(type)).length;
 }
 function applyFilters() {
   const query = dom.searchInput.value;
-  state.filtered = state.pokemon.filter(passesFilters).map(p => ({ ...p, score: scoreSearch(p, query) })).filter(p => !query || Number.isFinite(p.score));
-  sortResults(); renderResults(); renderActiveFilters();
+  const direct = [];
+  const scoreMap = new Map();
+  for (const p of state.pokemon) {
+    if (!passesPanelFilters(p)) continue;
+    const score = scoreSearch(p, query);
+    if (query && !Number.isFinite(score)) continue;
+    const row = { ...p, score: query ? score : valueScore(p), filter_match_count: typeFilterMatchCount(p) };
+    direct.push(row);
+    scoreMap.set(p.id, row.score);
+  }
+  state.filtered = includeEvolutionFamilies(direct, scoreMap);
+  sortResults(); renderResults(); renderActiveFilters(); renderFilterChips();
 }
 function sortResults() {
   const sort = dom.sortSelect.value, byName = (a,b)=>a.display_name.localeCompare(b.display_name);
+  const typeMatchCompare = (a, b) => state.filters.type.size ? (b.filter_match_count || 0) - (a.filter_match_count || 0) : 0;
   state.filtered.sort((a,b) => {
+    const typeCmp = typeMatchCompare(a, b);
+    if (typeCmp) return typeCmp;
     if (sort === 'dex') return a.dex_number_num - b.dex_number_num || byName(a,b);
     if (sort === 'name') return byName(a,b);
     if (sort === 'rating') return ratingValue(b.primary_rating) - ratingValue(a.primary_rating) || byName(a,b);
-    if (sort === 'storage') return (STORAGE_ORDER[b.storage_priority] ?? -1) - (STORAGE_ORDER[a.storage_priority] ?? -1) || byName(a,b);
     return b.score - a.score || ratingValue(b.primary_rating) - ratingValue(a.primary_rating) || byName(a,b);
   });
 }
-function renderStats() {
-  const highValue = state.pokemon.filter(p => ratingValue(p.current_stage_rating) >= 3 || ratingValue(p.final_potential_rating) >= 3).length;
-  el('statRows').textContent = state.pokemon.length.toLocaleString();
-  el('statFamilies').textContent = state.byFamily.size.toLocaleString();
-  el('statHighValue').textContent = highValue.toLocaleString();
-  el('statEvos').textContent = state.evolutions.length.toLocaleString();
-}
+function renderStats() {}
+
 function renderResults() {
   dom.resultCount.textContent = `${state.filtered.length.toLocaleString()} result${state.filtered.length === 1 ? '' : 's'}`;
   dom.results.innerHTML = '';
-  if (!state.filtered.length) { dom.results.innerHTML = '<div class="panel no-results">No matching Pokémon found. Try clearing a filter or searching by evolution family/move.</div>'; return; }
+  if (!state.filtered.length) { dom.results.innerHTML = '<div class="panel no-results">No matching Pokémon found. Try clearing a filter, checking spelling, or enabling Show evolutions.</div>'; return; }
   const fragment = document.createDocumentFragment();
   for (const p of state.filtered) {
     const node = dom.cardTemplate.content.firstElementChild.cloneNode(true); node.dataset.id = p.id; node.classList.toggle('selected', p.id === state.selectedId);
@@ -349,15 +495,24 @@ function renderResults() {
     ratings.append(ratingTag('Gym Attack', p.gym_attack_rating));
     ratings.append(ratingTag('Gym Defense', p.gym_defense_rating));
     node.querySelector('.card-note').textContent = p.recommended_wait_reason || p.notes || '';
-    node.addEventListener('click', () => selectPokemon(p.id));
-    node.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectPokemon(p.id); } });
+    node.addEventListener('click', () => selectPokemon(p.id, { fromCard: true }));
+    node.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectPokemon(p.id, { fromCard: true }); } });
     fragment.append(node);
   }
   dom.results.append(fragment);
   setupTopTierSparklers(dom.results);
 }
 
-function selectPokemon(id) { state.selectedId = id; renderResults(); renderDetail(state.byId.get(id)); }
+
+function selectPokemon(id, options = {}) {
+  state.selectedId = id;
+  renderResults();
+  renderDetail(state.byId.get(id));
+  if (options.fromCard && isVerticalViewport()) {
+    requestAnimationFrame(() => dom.detail.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  }
+}
+
 function ratingKv(label, rating, highlight=false) {
   const classes = `kv rating-kv ${ratingClass(rating)}${highlight ? ' best-use' : ''}`;
   return `<div class="${classes}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(toTitle(rating))}</strong></div>`;
@@ -483,10 +638,31 @@ function renderDetail(p) {
 }
 
 function formatEvolutionCost(e) { const parts=[]; if(e.evolution_kind)parts.push(toTitle(e.evolution_kind)); if(e.candy_cost)parts.push(`${e.candy_cost} candy`); if(e.item_required)parts.push(e.item_required); if(e.special_requirement)parts.push(e.special_requirement); if(e.walking_km_required)parts.push(`${e.walking_km_required} km walk`); if(e.buddy_requirement)parts.push(e.buddy_requirement); if(e.day_night_requirement)parts.push(e.day_night_requirement); if(e.lure_requirement)parts.push(`${e.lure_requirement} lure`); if(e.trade_evolution_discount)parts.push(`trade discount: ${e.trade_evolution_discount}`); if(e.random_evolution==='yes')parts.push('random evolution'); if(e.mega_energy_initial_cost)parts.push(`${e.mega_energy_initial_cost} initial Mega Energy`); if(e.mega_energy_subsequent_cost)parts.push(`${e.mega_energy_subsequent_cost} subsequent Mega Energy`); if(e.notes)parts.push(e.notes); return escapeHtml(parts.join(' • ') || 'No cost listed'); }
-function renderActiveFilters() { const pills=[]; const controls=[['type',dom.typeFilter.value],['stage',dom.stageFilter.value],['rating',dom.ratingFilter.value],['use',dom.useFilter.value],['action',dom.actionFilter.value],['storage',dom.storageFilter.value]]; const query=dom.searchInput.value.trim(); if(query)pills.push(`search: ${query}`); controls.filter(([,v])=>v).forEach(([k,v])=>pills.push(`${k}: ${v}`)); if(dom.legacyOnly.checked)pills.push('legacy'); if(dom.megaOnly.checked)pills.push('mega'); if(dom.shadowOnly.checked)pills.push('shadow'); if(dom.regionalOnly.checked)pills.push('regional/forms'); dom.activeFilters.innerHTML = pills.map(p => chipHtml(p, 'pill')).join(''); }
+
+function renderActiveFilters() {
+  const fragment = document.createDocumentFragment();
+  const query = dom.searchInput.value.trim();
+  if (query) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'active-chip search-active-chip';
+    button.dataset.clearSearch = 'true';
+    button.textContent = `“${query}”`;
+    button.title = 'Clear search';
+    fragment.append(button);
+  }
+  for (const group of ['type', 'stage', 'rating', 'use']) {
+    for (const value of selectedValues(group)) {
+      fragment.append(makeFilterButton(group, value, true));
+    }
+  }
+  dom.activeFilters.innerHTML = '';
+  dom.activeFilters.append(fragment);
+}
 function moveLine(fast, charged1, charged2) { const parts=[fast, charged1, charged2].filter(Boolean); return parts.length ? parts.join(' + ') : 'Not specified'; }
 function kv(label, value) { return `<div class="kv"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value || '—')}</strong></div>`; }
 function chip(text, className='pill') { const span=document.createElement('span'); span.className=className; span.textContent=text; return span; }
+
 function ratingTag(text, rating) {
   const span = chip(text, 'rating-tag');
   span.classList.add(ratingClass(rating || 'bad'));
@@ -501,9 +677,18 @@ function typeChipHtml(type, extraClass='', label=null) { return `<span class="${
 function chipHtml(text, className='pill') { return `<span class="${escapeHtml(className)}">${escapeHtml(text)}</span>`; }
 function escapeHtml(value) { return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
 function toTitle(value) { return String(value || '—').split(/([\s\-/]+)/).map(part => /^[a-z]/.test(part) ? part.charAt(0).toUpperCase() + part.slice(1) : part).join(''); }
-function resetFilters() { dom.searchInput.value=''; dom.typeFilter.value=''; dom.stageFilter.value=''; dom.ratingFilter.value=''; dom.useFilter.value=''; dom.actionFilter.value=''; dom.storageFilter.value=''; dom.legacyOnly.checked=false; dom.megaOnly.checked=false; dom.shadowOnly.checked=false; dom.regionalOnly.checked=false; dom.sortSelect.value='score'; applyFilters(); }
+
+function resetFilters() {
+  dom.searchInput.value = '';
+  for (const group of Object.keys(state.filters)) state.filters[group].clear();
+  if (dom.showEvolutions) dom.showEvolutions.checked = false;
+  dom.sortSelect.value = 'score';
+  renderFilterChips();
+  applyFilters();
+}
+
 function exportFilteredCsv() { if(!state.filtered.length)return; const headers=Object.keys(state.pokemon[0]).filter(k=>!k.startsWith('__') && !['display_name','type_label','primary_rating','main_uses_list','search_blob','score','dex_number_num'].includes(k)); const csv=[headers.join(',')].concat(state.filtered.map(row=>headers.map(h=>csvEscape(row[h])).join(','))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='pokemon_filtered_export.csv'; document.body.append(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
-function initializeData(pokemonRows, evolutionRows) { state.pokemon=pokemonRows.map(cleanPokemonRow); state.evolutions=evolutionRows.map(cleanEvolutionRow); state.byId.clear(); state.pokemon.forEach(p => state.byId.set(p.id, p)); deriveStages(); buildIndexes(); populateFilters(); renderStats(); applyFilters(); dom.loadPanel.classList.add('hidden'); dom.dataStatus.textContent=''; }
+function initializeData(pokemonRows, evolutionRows) { state.pokemon=pokemonRows.map(cleanPokemonRow); state.evolutions=evolutionRows.map(cleanEvolutionRow); state.byId.clear(); state.pokemon.forEach(p => state.byId.set(p.id, p)); deriveStages(); buildIndexes(); populateFilters(); renderStats(); setInitialFilterAccordion(); applyFilters(); dom.loadPanel.classList.add('hidden'); dom.dataStatus.textContent=''; }
 // Native scrolling inside the panel, with a tiny boundary handoff to the page.
 // This avoids the browser getting stuck on the detail panel after it reaches top/bottom.
 function enableScrollChaining(element) {
@@ -586,5 +771,72 @@ function wireTooltips() {
   window.addEventListener('resize', () => fitMiniEvolutionChains(dom.detail));
 }
 
-function wireEvents() { enableScrollChaining(dom.detail); const controlsPanel=document.querySelector('.controls'); enableScrollChaining(controlsPanel); [dom.searchInput,dom.typeFilter,dom.stageFilter,dom.ratingFilter,dom.useFilter,dom.actionFilter,dom.storageFilter,dom.sortSelect].forEach(control=>control.addEventListener('input',applyFilters)); [dom.legacyOnly,dom.megaOnly,dom.shadowOnly,dom.regionalOnly].forEach(control=>control.addEventListener('change',applyFilters)); dom.resetFilters.addEventListener('click',resetFilters); if(dom.exportFiltered)dom.exportFiltered.addEventListener('click',exportFilteredCsv); window.exportFilteredCsv=exportFilteredCsv; dom.themeToggle.addEventListener('click',()=>document.documentElement.classList.toggle('light')); dom.loadUploaded.addEventListener('click',async()=>{ try{ const [pokemonCsv,evolutionCsv]=await Promise.all([readFileInput(dom.pokemonFile),readFileInput(dom.evolutionsFile)]); initializeData(csvParse(pokemonCsv),csvParse(evolutionCsv)); }catch(error){ dom.dataStatus.textContent=error.message; } }); }
+
+function isStackedLayout() {
+  if (!dom.controlsPanel) return window.innerWidth <= 850;
+  const resultsArea = document.querySelector('.results-area');
+  if (!resultsArea) return window.innerWidth <= 850;
+  const controlRect = dom.controlsPanel.getBoundingClientRect();
+  const resultsRect = resultsArea.getBoundingClientRect();
+  return resultsRect.top > controlRect.top + 24;
+}
+function isVerticalViewport() {
+  return isStackedLayout();
+}
+function setFilterAccordion(collapsed) {
+  if (!dom.controlsPanel || !dom.filtersToggle) return;
+  dom.controlsPanel.classList.toggle('filters-collapsed', collapsed);
+  dom.filtersToggle.setAttribute('aria-expanded', String(!collapsed));
+}
+function setInitialFilterAccordion() {
+  requestAnimationFrame(() => setFilterAccordion(isStackedLayout()));
+}
+function updateBackToTopVisibility() {
+  if (!dom.backToTop || !dom.controlsPanel) return;
+  const rect = dom.controlsPanel.getBoundingClientRect();
+  dom.backToTop.classList.toggle('visible', rect.bottom < 0);
+}
+function wireEvents() {
+  enableScrollChaining(dom.detail);
+  const controlsPanel = document.querySelector('.controls');
+  enableScrollChaining(controlsPanel);
+  dom.searchInput.addEventListener('input', applyFilters);
+  dom.sortSelect.addEventListener('input', applyFilters);
+  dom.showEvolutions?.addEventListener('change', applyFilters);
+  dom.resetFilters.addEventListener('click', resetFilters);
+  dom.filterBody?.addEventListener('click', event => {
+    const chip = event.target.closest?.('[data-filter-group][data-filter-value]');
+    if (!chip) return;
+    toggleFilter(chip.dataset.filterGroup, chip.dataset.filterValue, 'add');
+  });
+  dom.activeFilters?.addEventListener('click', event => {
+    const searchChip = event.target.closest?.('[data-clear-search]');
+    if (searchChip) {
+      dom.searchInput.value = '';
+      applyFilters();
+      return;
+    }
+    const chip = event.target.closest?.('[data-filter-group][data-filter-value]');
+    if (chip) toggleFilter(chip.dataset.filterGroup, chip.dataset.filterValue, 'remove');
+  });
+  dom.filtersToggle?.addEventListener('click', () => {
+    const collapsed = !dom.controlsPanel.classList.contains('filters-collapsed');
+    setFilterAccordion(collapsed);
+  });
+  dom.backToTop?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  window.addEventListener('scroll', updateBackToTopVisibility, { passive: true });
+  window.addEventListener('resize', updateBackToTopVisibility);
+  if (dom.exportFiltered) dom.exportFiltered.addEventListener('click', exportFilteredCsv);
+  window.exportFilteredCsv = exportFilteredCsv;
+  dom.themeToggle.addEventListener('click', () => document.documentElement.classList.toggle('light'));
+  dom.loadUploaded.addEventListener('click', async () => {
+    try {
+      const [pokemonCsv, evolutionCsv] = await Promise.all([readFileInput(dom.pokemonFile), readFileInput(dom.evolutionsFile)]);
+      initializeData(csvParse(pokemonCsv), csvParse(evolutionCsv));
+    } catch (error) {
+      dom.dataStatus.textContent = error.message;
+    }
+  });
+}
+
 wireTooltips(); wireEvents(); loadData();

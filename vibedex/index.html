@@ -39,56 +39,53 @@
       </div>
     </section>
 
-    <section class="stats-grid" aria-label="Database statistics">
-      <article class="stat-card"><span class="stat-label">Pokémon rows</span><strong id="statRows">—</strong></article>
-      <article class="stat-card"><span class="stat-label">Families</span><strong id="statFamilies">—</strong></article>
-      <article class="stat-card"><span class="stat-label">High-value rows</span><strong id="statHighValue">—</strong></article>
-      <article class="stat-card"><span class="stat-label">Evolution links</span><strong id="statEvos">—</strong></article>
-    </section>
-
     <main class="app-grid">
-      <aside class="panel controls">
-        <h2>Search & filters</h2>
-        <label class="field">
+      <aside class="panel controls" id="controlsPanel">
+        <button id="filtersToggle" class="filters-toggle" type="button" aria-expanded="true">
+          <span class="accordion-label">Search &amp; filters</span>
+          <span class="accordion-arrow" aria-hidden="true"></span>
+        </button>
+
+        <label class="field search-field">
           <span>Search</span>
-          <input id="searchInput" type="search" placeholder="Mudkip, Water, raids, gyms, defense, legendary, #260…" autocomplete="off" />
+          <input id="searchInput" type="search" placeholder="Mudkip, fire gym attack, Hydro Cannon, legendary, #260…" autocomplete="off" />
         </label>
 
-        <div class="filter-grid">
-          <label class="field"><span>Type</span><select id="typeFilter"><option value="">All types</option></select></label>
-          <label class="field"><span>Stage</span><select id="stageFilter"><option value="">All stages</option></select></label>
-          <label class="field"><span>Rating</span><select id="ratingFilter"><option value="">All ratings</option></select></label>
-          <label class="field"><span>Use</span><select id="useFilter"><option value="">All uses</option></select></label>
-          <label class="field"><span>Action</span><select id="actionFilter"><option value="">All actions</option></select></label>
-          <label class="field"><span>Storage</span><select id="storageFilter"><option value="">All priorities</option></select></label>
-        </div>
-
-        <div class="switches">
-          <label><input id="legacyOnly" type="checkbox" /> Legacy/event move needed</label>
-          <label><input id="megaOnly" type="checkbox" /> Mega relevant</label>
-          <label><input id="shadowOnly" type="checkbox" /> Shadow relevant</label>
-          <label><input id="regionalOnly" type="checkbox" /> Regional/forms only</label>
-        </div>
-
-        <div class="sort-row">
-          <label class="field"><span>Sort</span><select id="sortSelect">
-            <option value="score">Best match / value</option>
-            <option value="dex">Dex number</option>
-            <option value="name">Name</option>
-            <option value="rating">Rating</option>
-            <option value="storage">Storage priority</option>
-          </select></label>
-          <button id="resetFilters" class="ghost-button" type="button">Reset</button>
+        <div id="filterBody" class="filter-body">
+          <section class="filter-section">
+            <h3>Type</h3>
+            <div id="typeChips" class="filter-chip-row"></div>
+          </section>
+          <section class="filter-section">
+            <h3>Stage</h3>
+            <div id="stageChips" class="filter-chip-row"></div>
+          </section>
+          <section class="filter-section">
+            <h3>Rating</h3>
+            <div id="ratingChips" class="filter-chip-row"></div>
+          </section>
+          <section class="filter-section">
+            <h3>Use</h3>
+            <div id="useChips" class="filter-chip-row"></div>
+          </section>
+          <button id="resetFilters" class="ghost-button reset-button" type="button">Reset filters</button>
         </div>
       </aside>
 
       <section class="results-area">
         <div class="toolbar panel">
-          <div>
+          <div class="toolbar-left">
             <h2 id="resultCount">Loading…</h2>
+            <label class="field sort-field"><span>Sort</span><select id="sortSelect">
+              <option value="score">Best match / value</option>
+              <option value="dex">Dex number</option>
+              <option value="name">Name</option>
+              <option value="rating">Rating</option>
+            </select></label>
+            <label class="show-evolutions check-label"><input id="showEvolutions" type="checkbox" /><span class="custom-check" aria-hidden="true"></span><span>Show evolutions</span></label>
             <p id="dataStatus"></p>
           </div>
-          <div class="pill-row" id="activeFilters"></div>
+          <div class="pill-row active-filter-row" id="activeFilters"></div>
         </div>
 
         <div id="results" class="results-grid" aria-live="polite"></div>
@@ -101,6 +98,7 @@
         </div>
       </aside>
     </main>
+    <button id="backToTop" class="back-to-top" type="button" aria-label="Back to top">↑</button>
   </div>
 
   <template id="resultCardTemplate">
