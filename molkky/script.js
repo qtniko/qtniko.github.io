@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STORAGE_KEY = "molkky-scorekeeper-v1";
+  const STORAGE_KEY = "molkky-scorekeeper-v2";
   const MIN_TEAMS = 2;
   const MAX_TEAMS = 10;
 
@@ -29,22 +29,30 @@
       teamCount: 2,
       teams: [],
       round: 1,
-      currentTurnIndex: 0,
+      currentTeamIndex: 0,
+      roundThrowIndex: 0,
+      standingsPending: false,
       history: [],
       winnerId: null,
-      selectedSetupTeamId: null
+      selectedSetupTeamId: null,
+      turnOverride: null,
+      pendingTurnSnapshot: null
     };
   }
 
   function createTeams(count) {
     return Array.from({ length: count }, (_, index) => {
       const style = TEAM_STYLES[index];
+      const teamId = makeId("team");
       return {
-        id: makeId("team"),
+        id: teamId,
         name: `Team ${style.label}`,
         color: style.color,
         soft: style.soft,
         total: 0,
+        currentPlayerIndex: 0,
+        deferredPlayerQueue: [],
+        guestId: `guest-${teamId}`,
         players: []
       };
     });
@@ -67,10 +75,68 @@
       if (!raw) return null;
       const saved = JSON.parse(raw);
       if (!saved || typeof saved !== "object" || !saved.view) return null;
-      return saved;
+      return normalizeState(saved);
     } catch {
       return null;
     }
+  }
+
+  function normalizeState(saved) {
+    saved.currentTeamIndex = Number.isInteger(saved.currentTeamIndex)
+      ? saved.currentTeamIndex
+      : 0;
+    saved.roundThrowIndex = Number.isInteger(saved.roundThrowIndex)
+      ? saved.roundThrowIndex
+      : 0;
+    saved.standingsPending = Boolean(saved.standingsPending);
+    saved.turnOverride = saved.turnOverride && typeof saved.turnOverride === "object"
+      ? saved.turnOverride
+      : null;
+    saved.pendingTurnSnapshot = saved.pendingTurnSnapshot && typeof saved.pendingTurnSnapshot === "object"
+      ? saved.pendingTurnSnapshot
+      : null;
+
+    if (!Array.isArray(saved.history)) saved.history = [];
+    saved.history.forEach((entry) => {
+      entry.isGuest = Boolean(entry.isGuest);
+      entry.contribution = Number.isFinite(entry.contribution)
+        ? entry.contribution
+        : (entry.exceededFifty ? -25 : Number(entry.score) || 0);
+    });
+
+    if (!Array.isArray(saved.teams)) saved.teams = [];
+    saved.teams.forEach((team) => {
+      team.currentPlayerIndex = Number.isInteger(team.currentPlayerIndex)
+        ? team.currentPlayerIndex
+        : 0;
+      team.guestId = team.guestId || `guest-${team.id}`;
+      team.deferredPlayerQueue = Array.isArray(team.deferredPlayerQueue)
+        ? [...new Set(team.deferredPlayerQueue)]
+        : [];
+      if (!Array.isArray(team.players)) team.players = [];
+
+      const validPlayerIds = new Set(team.players.map((player) => player.id));
+      team.deferredPlayerQueue = team.deferredPlayerQueue.filter((playerId) => validPlayerIds.has(playerId));
+
+      if (team.players.length) {
+        team.currentPlayerIndex = ((team.currentPlayerIndex % team.players.length) + team.players.length) % team.players.length;
+      } else {
+        team.currentPlayerIndex = 0;
+      }
+
+      team.players.forEach((player) => {
+        player.hasPlayed = Boolean(player.hasPlayed);
+      });
+    });
+
+    if (saved.teams.length) {
+      saved.currentTeamIndex = ((saved.currentTeamIndex % saved.teams.length) + saved.teams.length) % saved.teams.length;
+    } else {
+      saved.currentTeamIndex = 0;
+    }
+
+    delete saved.currentTurnIndex;
+    return saved;
   }
 
   function escapeHtml(value) {
@@ -86,36 +152,191 @@
     return `--team-color:${team.color};--team-soft:${team.soft}`;
   }
 
-  function getTurnOrder() {
-    if (!state.teams.length) return [];
-    const maxPlayers = Math.max(...state.teams.map((team) => team.players.length));
-    const turns = [];
-
-    for (let playerIndex = 0; playerIndex < maxPlayers; playerIndex += 1) {
-      state.teams.forEach((team) => {
-        const player = team.players[playerIndex];
-        if (player) {
-          turns.push({ teamId: team.id, playerId: player.id });
-        }
-      });
-    }
-
-    return turns;
-  }
-
   function getTeam(teamId) {
     return state.teams.find((team) => team.id === teamId);
   }
 
   function getPlayer(team, playerId) {
-    return team.players.find((player) => player.id === playerId);
+    return team?.players.find((player) => player.id === playerId);
+  }
+
+  function getGuest(team) {
+    return {
+      id: team.guestId,
+      name: "Guest",
+      isGuest: true
+    };
+  }
+
+  function cleanDeferredQueue(team) {
+    const validIds = new Set(team.players.map((player) => player.id));
+    team.deferredPlayerQueue = [...new Set(team.deferredPlayerQueue)].filter((playerId) => validIds.has(playerId));
+  }
+
+  function getBaseTurn(team) {
+    if (!team || !team.players.length) return null;
+    cleanDeferredQueue(team);
+
+    const deferredPlayer = getPlayer(team, team.deferredPlayerQueue[0]);
+    if (deferredPlayer) {
+      return {
+        team,
+        actor: deferredPlayer,
+        actorType: "player",
+        coveragePlayer: deferredPlayer,
+        consumeSource: "queue",
+        substitutingForName: null
+      };
+    }
+
+    if (team.currentPlayerIndex >= team.players.length) {
+      team.currentPlayerIndex = 0;
+    }
+
+    const player = team.players[team.currentPlayerIndex];
+    return {
+      team,
+      actor: player,
+      actorType: "player",
+      coveragePlayer: player,
+      consumeSource: "regular",
+      substitutingForName: null
+    };
+  }
+
+  function getCurrentTurn() {
+    const team = state.teams[state.currentTeamIndex];
+    if (!team || !team.players.length) return null;
+
+    const override = state.turnOverride;
+    if (override && override.teamId === team.id) {
+      const coveragePlayer = getPlayer(team, override.coveragePlayerId);
+      if (!coveragePlayer) {
+        state.turnOverride = null;
+        state.pendingTurnSnapshot = null;
+        return getBaseTurn(team);
+      }
+
+      const actor = override.actorType === "guest"
+        ? getGuest(team)
+        : getPlayer(team, override.actorPlayerId);
+
+      if (!actor) {
+        state.turnOverride = null;
+        state.pendingTurnSnapshot = null;
+        return getBaseTurn(team);
+      }
+
+      return {
+        team,
+        actor,
+        actorType: override.actorType,
+        coveragePlayer,
+        consumeSource: override.consumeSource,
+        substitutionKind: override.substitutionKind || (override.actorType === "guest" ? "guest" : "teammate"),
+        substitutingForName: override.substitutingForName || null
+      };
+    }
+
+    return getBaseTurn(team);
+  }
+
+  function allPlayersHavePlayed() {
+    return state.teams.length > 0 && state.teams.every((team) =>
+      team.players.length > 0 && team.players.every((player) => player.hasPlayed)
+    );
+  }
+
+  function resetPlayedMarkers() {
+    state.teams.forEach((team) => {
+      team.players.forEach((player) => {
+        player.hasPlayed = false;
+      });
+    });
+  }
+
+  function clonePlain(value) {
+    return value == null ? value : JSON.parse(JSON.stringify(value));
+  }
+
+  function captureTurnState() {
+    return {
+      currentTeamIndex: state.currentTeamIndex,
+      roundThrowIndex: state.roundThrowIndex,
+      standingsPending: state.standingsPending,
+      turnOverride: clonePlain(state.turnOverride),
+      teams: state.teams.map((team) => ({
+        teamId: team.id,
+        currentPlayerIndex: team.currentPlayerIndex,
+        deferredPlayerQueue: [...team.deferredPlayerQueue],
+        players: team.players.map((player) => ({
+          playerId: player.id,
+          hasPlayed: player.hasPlayed
+        }))
+      }))
+    };
+  }
+
+  function restoreTurnState(snapshot) {
+    if (!snapshot) return;
+
+    state.currentTeamIndex = Number.isInteger(snapshot.currentTeamIndex) ? snapshot.currentTeamIndex : 0;
+    state.roundThrowIndex = Number.isInteger(snapshot.roundThrowIndex) ? snapshot.roundThrowIndex : 0;
+    state.standingsPending = Boolean(snapshot.standingsPending);
+    state.turnOverride = clonePlain(snapshot.turnOverride) || null;
+    state.pendingTurnSnapshot = null;
+
+    (snapshot.teams || []).forEach((savedTeam) => {
+      const team = getTeam(savedTeam.teamId);
+      if (!team) return;
+      team.currentPlayerIndex = Number.isInteger(savedTeam.currentPlayerIndex)
+        ? savedTeam.currentPlayerIndex
+        : 0;
+      team.deferredPlayerQueue = Array.isArray(savedTeam.deferredPlayerQueue)
+        ? [...savedTeam.deferredPlayerQueue]
+        : [];
+      (savedTeam.players || []).forEach((savedPlayer) => {
+        const player = getPlayer(team, savedPlayer.playerId);
+        if (player) player.hasPlayed = Boolean(savedPlayer.hasPlayed);
+      });
+      cleanDeferredQueue(team);
+    });
   }
 
   function getPlayerStats(playerId) {
     const throws = state.history.filter((entry) => entry.playerId === playerId);
     return {
       throws: throws.length,
-      scored: throws.reduce((sum, entry) => sum + entry.score, 0)
+      scored: throws.reduce((sum, entry) => sum + entry.contribution, 0)
+    };
+  }
+
+  function formatPointTotal(value) {
+    return `${value} ${Math.abs(value) === 1 ? "pt" : "pts"}`;
+  }
+
+  function getGuestStats(team) {
+    return getPlayerStats(team.guestId);
+  }
+
+  function getMvpResult() {
+    const candidates = state.teams.flatMap((team) => team.players.map((player) => ({
+      team,
+      player,
+      stats: getPlayerStats(player.id)
+    })));
+
+    if (!candidates.length) return null;
+    candidates.sort((a, b) =>
+      b.stats.scored - a.stats.scored ||
+      a.stats.throws - b.stats.throws ||
+      a.player.name.localeCompare(b.player.name)
+    );
+
+    const bestScore = candidates[0].stats.scored;
+    return {
+      score: bestScore,
+      winners: candidates.filter((candidate) => candidate.stats.scored === bestScore)
     };
   }
 
@@ -196,6 +417,14 @@
     });
   }
 
+  function pencilIcon() {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 20h4.2L19 9.2a2.1 2.1 0 0 0 0-3L17.8 5a2.1 2.1 0 0 0-3 0L4 15.8V20Zm2-3.4 10.2-10.2 1.4 1.4L7.4 18H6v-1.4Z" fill="currentColor"/>
+      </svg>
+    `;
+  }
+
   function renderPlayerSetup() {
     const teamOptions = state.teams
       .map((team) => `<option value="${team.id}" ${team.id === state.selectedSetupTeamId ? "selected" : ""}>${escapeHtml(team.name)}</option>`)
@@ -214,7 +443,12 @@
       return `
         <article class="setup-team-card" style="${teamVars(team)}">
           <div class="setup-team-head">
-            <h3 class="setup-team-name">${escapeHtml(team.name)}</h3>
+            <div class="setup-team-title-row">
+              <h3 class="setup-team-name">${escapeHtml(team.name)}</h3>
+              <button type="button" class="rename-team-button" data-team-id="${team.id}" aria-label="Rename ${escapeHtml(team.name)}">
+                ${pencilIcon()}
+              </button>
+            </div>
             <span class="player-count">${team.players.length} ${team.players.length === 1 ? "player" : "players"}</span>
           </div>
           ${players}
@@ -260,6 +494,7 @@
       state.selectedSetupTeamId = event.target.value;
       saveState();
     });
+
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       const nameInput = document.getElementById("playerName");
@@ -270,13 +505,11 @@
 
       if (!name || !team) return;
 
-      team.players.push({ id: makeId("player"), name });
+      team.players.push({ id: makeId("player"), name, hasPlayed: false });
       setupError = "";
       saveState();
       renderPlayerSetup();
-
-      const nextInput = document.getElementById("playerName");
-      nextInput.focus();
+      document.getElementById("playerName").focus();
     });
 
     document.querySelectorAll(".remove-player").forEach((button) => {
@@ -284,9 +517,17 @@
         const team = getTeam(button.dataset.teamId);
         if (!team) return;
         team.players = team.players.filter((player) => player.id !== button.dataset.playerId);
+        cleanDeferredQueue(team);
         setupError = "";
         saveState();
         renderPlayerSetup();
+      });
+    });
+
+    document.querySelectorAll(".rename-team-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const team = getTeam(button.dataset.teamId);
+        if (team) openRenameTeamDialog(team);
       });
     });
 
@@ -309,10 +550,19 @@
 
       state.view = "game";
       state.round = 1;
-      state.currentTurnIndex = 0;
+      state.currentTeamIndex = 0;
+      state.roundThrowIndex = 0;
+      state.standingsPending = false;
       state.history = [];
       state.winnerId = null;
-      state.teams.forEach((team) => { team.total = 0; });
+      state.turnOverride = null;
+      state.pendingTurnSnapshot = null;
+      state.teams.forEach((team) => {
+        team.total = 0;
+        team.currentPlayerIndex = 0;
+        team.deferredPlayerQueue = [];
+        team.players.forEach((player) => { player.hasPlayed = false; });
+      });
       setupError = "";
       saveState();
       render();
@@ -323,61 +573,86 @@
     return `
       <div class="scoreboard-wrap">
         <div class="scoreboard" aria-label="Team scores">
-          ${state.teams.map((team) => `
-            <details class="score-team" style="${teamVars(team)}">
-              <summary>
-                <span class="score-name">${escapeHtml(team.name)}</span>
-                <span class="score-number">${team.total}</span>
-              </summary>
-              <ul class="score-roster">
-                ${team.players.map((player) => {
-                  const stats = getPlayerStats(player.id);
-                  return `
-                    <li>
-                      <span class="score-roster-name">${escapeHtml(player.name)}</span>
-                      <span class="score-roster-stat">${stats.scored} pts · ${stats.throws} ${stats.throws === 1 ? "throw" : "throws"}</span>
+          ${state.teams.map((team) => {
+            const guestStats = getGuestStats(team);
+            return `
+              <details class="score-team" style="${teamVars(team)}">
+                <summary>
+                  <span class="score-name">${escapeHtml(team.name)}</span>
+                  <span class="score-number">${team.total}</span>
+                </summary>
+                <ul class="score-roster">
+                  ${team.players.map((player) => {
+                    const stats = getPlayerStats(player.id);
+                    return `
+                      <li>
+                        <span class="score-roster-name">${escapeHtml(player.name)}</span>
+                        <span class="score-roster-stat">${formatPointTotal(stats.scored)} · ${stats.throws} ${stats.throws === 1 ? "throw" : "throws"}</span>
+                      </li>
+                    `;
+                  }).join("")}
+                  ${guestStats.throws ? `
+                    <li class="guest-roster-row">
+                      <span class="score-roster-name guest-name">Guest</span>
+                      <span class="score-roster-stat">${formatPointTotal(guestStats.scored)} · ${guestStats.throws} ${guestStats.throws === 1 ? "throw" : "throws"}</span>
                     </li>
-                  `;
-                }).join("")}
-              </ul>
-            </details>
-          `).join("")}
+                  ` : ""}
+                </ul>
+              </details>
+            `;
+          }).join("")}
         </div>
       </div>
     `;
   }
 
+  function willCompleteCoverage(turn) {
+    const targetId = turn.coveragePlayer.id;
+    if (turn.coveragePlayer.hasPlayed) return false;
+    return state.teams.every((team) =>
+      team.players.every((player) => player.id === targetId || player.hasPlayed)
+    );
+  }
+
   function renderGame() {
-    const turnOrder = getTurnOrder();
-    if (!turnOrder.length) {
+    const turn = getCurrentTurn();
+    if (!turn) {
       state.view = "players";
       saveState();
       render();
       return;
     }
 
-    if (state.currentTurnIndex >= turnOrder.length) {
-      state.currentTurnIndex = 0;
-    }
-
-    const turn = turnOrder[state.currentTurnIndex];
-    const team = getTeam(turn.teamId);
-    const player = getPlayer(team, turn.playerId);
-    const isLastThrowOfRound = state.currentTurnIndex === turnOrder.length - 1;
+    const { team, actor, actorType, coveragePlayer, substitutionKind, substitutingForName } = turn;
+    const isGuest = actorType === "guest";
+    const substitutionNote = substitutionKind === "guest" && substitutingForName
+      ? `Throwing for ${escapeHtml(substitutingForName)}`
+      : substitutionKind === "teammate" && substitutingForName
+        ? `${escapeHtml(substitutingForName)} was deferred and is first in this team’s priority queue.`
+        : "";
+    const isLastTeam = state.currentTeamIndex === state.teams.length - 1;
+    const willShowStandings = isLastTeam && (state.standingsPending || willCompleteCoverage(turn));
+    const queueNotice = team.deferredPlayerQueue.length
+      ? `<span class="deferred-badge">${team.deferredPlayerQueue.length} deferred ${team.deferredPlayerQueue.length === 1 ? "turn" : "turns"}</span>`
+      : "";
 
     app.innerHTML = `
       <main class="app-shell with-scoreboard">
         ${renderScoreboard()}
 
         <div class="game-topline">
-          <span class="round-label">Round ${state.round} · Throw ${state.currentTurnIndex + 1} of ${turnOrder.length}</span>
+          <div class="round-info">
+            <span class="round-label">Round ${state.round} · Throw ${state.roundThrowIndex + 1}</span>
+            ${queueNotice}
+          </div>
           <button type="button" class="btn btn-secondary btn-small" id="newGame">New game</button>
         </div>
 
         <div class="play-layout">
-          <section class="current-player-card" style="${teamVars(team)}">
+          <section class="current-player-card ${isGuest ? "guest-current-player" : ""}" style="${teamVars(team)}">
             <p class="current-team">${escapeHtml(team.name)}</p>
-            <h1 class="current-player">${escapeHtml(player.name)}</h1>
+            <h1 class="current-player ${isGuest ? "guest-name" : ""}">${escapeHtml(actor.name)}</h1>
+            ${substitutionNote ? `<p class="substitution-note">${substitutionNote}</p>` : ""}
             <p class="current-total">Team total: <strong>${team.total}</strong> / 50</p>
           </section>
 
@@ -391,8 +666,10 @@
             </div>
             <div class="selected-score" id="selectedScoreText">Select a score</div>
             <button type="button" class="btn submit-score" id="submitScore" disabled>
-              ${isLastThrowOfRound ? "Record score & show standings" : "Record score & next player"}
+              ${willShowStandings ? "Record score & show standings" : "Record score & next player"}
             </button>
+            ${!isGuest ? `<button type="button" class="btn unavailable-button" id="playerUnavailable">Player unavailable / substitute</button>` : ""}
+            ${state.pendingTurnSnapshot ? `<button type="button" class="btn cancel-substitution-button" id="cancelSubstitution">Cancel substitution</button>` : ""}
           </section>
         </div>
 
@@ -417,42 +694,177 @@
 
     document.getElementById("submitScore").addEventListener("click", () => {
       if (selectedScore === null) return;
-      recordScore(selectedScore, turn, team, player, isLastThrowOfRound);
+      recordScore(selectedScore, turn);
     });
 
+    document.getElementById("playerUnavailable")?.addEventListener("click", () => {
+      openSubstitutionDialog(turn);
+    });
+    document.getElementById("cancelSubstitution")?.addEventListener("click", cancelPendingSubstitution);
     document.getElementById("undoThrow").addEventListener("click", undoLastThrow);
     document.getElementById("newGame").addEventListener("click", confirmNewGame);
   }
 
-  function recordScore(score, turn, team, player, isLastThrowOfRound) {
+  function findNextAvailableTeammate(turn) {
+    const { team, coveragePlayer, consumeSource } = turn;
+    if (team.players.length < 2) return null;
+
+    const currentIndex = team.players.findIndex((player) => player.id === coveragePlayer.id);
+    if (currentIndex < 0) return null;
+
+    // A priority-queue turn does not move the normal team pointer. If that queued
+    // player is unavailable again, resume from the team's normally scheduled player.
+    const startIndex = consumeSource === "queue"
+      ? team.currentPlayerIndex
+      : (currentIndex + 1) % team.players.length;
+    const unavailableIds = new Set([...team.deferredPlayerQueue, coveragePlayer.id]);
+
+    for (let offset = 0; offset < team.players.length; offset += 1) {
+      const candidate = team.players[(startIndex + offset) % team.players.length];
+      if (!unavailableIds.has(candidate.id)) return candidate;
+    }
+    return null;
+  }
+
+  function ensurePendingTurnSnapshot() {
+    if (!state.pendingTurnSnapshot) {
+      state.pendingTurnSnapshot = captureTurnState();
+    }
+  }
+
+  function deferPlayer(team, playerId, consumeSource) {
+    if (consumeSource === "queue") {
+      const queueIndex = team.deferredPlayerQueue.indexOf(playerId);
+      if (queueIndex >= 0) team.deferredPlayerQueue.splice(queueIndex, 1);
+    }
+    if (!team.deferredPlayerQueue.includes(playerId)) {
+      team.deferredPlayerQueue.push(playerId);
+    }
+  }
+
+  function applyTeammateSubstitution(turn) {
+    const nextPlayer = findNextAvailableTeammate(turn);
+    if (!nextPlayer) return;
+
+    ensurePendingTurnSnapshot();
+    deferPlayer(turn.team, turn.coveragePlayer.id, turn.consumeSource);
+
+    const nextIndex = turn.team.players.findIndex((player) => player.id === nextPlayer.id);
+    turn.team.currentPlayerIndex = nextIndex;
+    state.turnOverride = {
+      teamId: turn.team.id,
+      actorType: "player",
+      actorPlayerId: nextPlayer.id,
+      coveragePlayerId: nextPlayer.id,
+      consumeSource: "regular",
+      substitutionKind: "teammate",
+      substitutingForName: turn.coveragePlayer.name
+    };
+
+    saveState();
+    render();
+  }
+
+  function applyExternalSubstitution(turn) {
+    ensurePendingTurnSnapshot();
+    state.turnOverride = {
+      teamId: turn.team.id,
+      actorType: "guest",
+      actorPlayerId: turn.team.guestId,
+      coveragePlayerId: turn.coveragePlayer.id,
+      consumeSource: turn.consumeSource,
+      substitutionKind: "guest",
+      substitutingForName: turn.coveragePlayer.name
+    };
+    saveState();
+    render();
+  }
+
+  function cancelPendingSubstitution() {
+    const snapshot = clonePlain(state.pendingTurnSnapshot);
+    if (!snapshot) return;
+    restoreTurnState(snapshot);
+    saveState();
+    render();
+  }
+
+  function consumeTurn(team, coveragePlayer, consumeSource) {
+    coveragePlayer.hasPlayed = true;
+
+    if (consumeSource === "queue") {
+      const queueIndex = team.deferredPlayerQueue.indexOf(coveragePlayer.id);
+      if (queueIndex >= 0) team.deferredPlayerQueue.splice(queueIndex, 1);
+
+      const pointerPlayer = team.players[team.currentPlayerIndex];
+      if (pointerPlayer?.id === coveragePlayer.id) {
+        team.currentPlayerIndex = (team.currentPlayerIndex + 1) % team.players.length;
+      }
+      return;
+    }
+
+    const playerIndex = team.players.findIndex((player) => player.id === coveragePlayer.id);
+    if (playerIndex >= 0) {
+      team.currentPlayerIndex = (playerIndex + 1) % team.players.length;
+    }
+  }
+
+  function recordScore(score, turn) {
+    const { team, actor, actorType, coveragePlayer, consumeSource } = turn;
     const previousTotal = team.total;
     const rawTotal = previousTotal + score;
     const exceededFifty = rawTotal > 50;
     const resultingTotal = exceededFifty ? 25 : rawTotal;
+    const contribution = exceededFifty ? -25 : score;
+    const turnStateBefore = clonePlain(state.pendingTurnSnapshot) || captureTurnState();
 
     team.total = resultingTotal;
     state.history.push({
       id: makeId("throw"),
       round: state.round,
-      turnIndex: state.currentTurnIndex,
+      turnIndex: state.roundThrowIndex,
       teamId: team.id,
-      playerId: player.id,
-      playerName: player.name,
+      playerId: actor.id,
+      playerName: actor.name,
+      coveredPlayerId: coveragePlayer.id,
+      coveredPlayerName: coveragePlayer.name,
       teamName: team.name,
       score,
+      contribution,
       previousTotal,
       resultingTotal,
       exceededFifty,
+      isGuest: actorType === "guest",
+      turnStateBefore,
       timestamp: Date.now()
     });
+
+    consumeTurn(team, coveragePlayer, consumeSource);
+    state.turnOverride = null;
+    state.pendingTurnSnapshot = null;
+    state.roundThrowIndex += 1;
 
     if (resultingTotal === 50) {
       state.winnerId = team.id;
       state.view = "finished";
-    } else if (isLastThrowOfRound) {
-      state.view = "standings";
+      saveState();
+      render();
+      return;
+    }
+
+    if (allPlayersHavePlayed()) {
+      state.standingsPending = true;
+    }
+
+    const isLastTeam = state.currentTeamIndex === state.teams.length - 1;
+    if (isLastTeam) {
+      state.currentTeamIndex = 0;
+      if (state.standingsPending) {
+        resetPlayedMarkers();
+        state.standingsPending = false;
+        state.view = "standings";
+      }
     } else {
-      state.currentTurnIndex += 1;
+      state.currentTeamIndex += 1;
     }
 
     saveState();
@@ -468,7 +880,7 @@
 
     state.winnerId = null;
     state.round = last.round;
-    state.currentTurnIndex = last.turnIndex;
+    restoreTurnState(last.turnStateBefore);
     state.view = "game";
     saveState();
     render();
@@ -499,7 +911,7 @@
         <section class="panel">
           <p class="eyebrow">Round ${state.round} complete</p>
           <h1>Current standings</h1>
-          <p class="lead">Everyone has thrown once this round. Take a moment to review the scores.</p>
+          <p class="lead">Every player’s turn has been completed, and every team has finished the same number of team turns. Take a moment to review the scores.</p>
           ${standingsMarkup()}
           <button type="button" class="btn btn-primary btn-block" id="nextRound" style="margin-top:22px">Start round ${state.round + 1}</button>
           <div class="button-row centered">
@@ -512,13 +924,36 @@
 
     document.getElementById("nextRound").addEventListener("click", () => {
       state.round += 1;
-      state.currentTurnIndex = 0;
+      state.roundThrowIndex = 0;
       state.view = "game";
       saveState();
       render();
     });
     document.getElementById("undoThrow").addEventListener("click", undoLastThrow);
     document.getElementById("newGame").addEventListener("click", confirmNewGame);
+  }
+
+  function renderMvp() {
+    const mvp = getMvpResult();
+    if (!mvp) return "";
+    const tie = mvp.winners.length > 1;
+
+    return `
+      <section class="panel mvp-panel">
+        <p class="eyebrow">${tie ? "MVP tie" : "Most valuable player"}</p>
+        <h2>${tie ? "MVPs" : "MVP"}</h2>
+        <div class="mvp-list">
+          ${mvp.winners.map(({ team, player }) => `
+            <div class="mvp-player" style="${teamVars(team)}">
+              <span class="mvp-name">${escapeHtml(player.name)}</span>
+              <span class="mvp-team">${escapeHtml(team.name)}</span>
+            </div>
+          `).join("")}
+        </div>
+        <div class="mvp-score">${formatPointTotal(mvp.score)}</div>
+        <p class="helper">Over-50 resets count as −25 points for individual scoring. Guest throws are excluded.</p>
+      </section>
+    `;
   }
 
   function renderFinished() {
@@ -534,6 +969,8 @@
           <div class="winner-name">${escapeHtml(winner.name)} wins</div>
           <p class="lead" style="margin:10px 0 0">Final score: <strong>${winner.total}</strong></p>
         </section>
+
+        ${renderMvp()}
 
         <section class="panel">
           <h2>Final standings</h2>
@@ -551,14 +988,17 @@
           <ul class="history-list">
             ${latestFirst.map((entry) => {
               const team = getTeam(entry.teamId);
+              const contributionLabel = entry.contribution === entry.score
+                ? `+${entry.score}`
+                : "−25";
               return `
                 <li class="history-item" style="${teamVars(team)}">
                   <div class="history-main">
-                    <div><span class="history-name">${escapeHtml(entry.playerName)}</span> · ${escapeHtml(entry.teamName)}</div>
-                    <div class="history-meta">Round ${entry.round}</div>
+                    <div><span class="history-name ${entry.isGuest ? "guest-name" : ""}">${escapeHtml(entry.playerName)}</span> · ${escapeHtml(entry.teamName)}</div>
+                    <div class="history-meta">Round ${entry.round}${entry.isGuest ? ` · for ${escapeHtml(entry.coveredPlayerName)}` : ""}</div>
                     <div class="history-result">${entry.previousTotal} → ${entry.resultingTotal}${entry.exceededFifty ? " · over 50, reset to 25" : ""}</div>
                   </div>
-                  <strong class="history-score">+${entry.score}</strong>
+                  <strong class="history-score ${entry.isGuest ? "guest-name" : ""}" title="Individual score contribution">${contributionLabel}</strong>
                 </li>
               `;
             }).join("")}
@@ -576,11 +1016,20 @@
     `;
 
     document.getElementById("playAgain").addEventListener("click", () => {
-      state.teams.forEach((team) => { team.total = 0; });
+      state.teams.forEach((team) => {
+        team.total = 0;
+        team.currentPlayerIndex = 0;
+        team.deferredPlayerQueue = [];
+        team.players.forEach((player) => { player.hasPlayed = false; });
+      });
       state.round = 1;
-      state.currentTurnIndex = 0;
+      state.currentTeamIndex = 0;
+      state.roundThrowIndex = 0;
+      state.standingsPending = false;
       state.history = [];
       state.winnerId = null;
+      state.turnOverride = null;
+      state.pendingTurnSnapshot = null;
       state.view = "game";
       saveState();
       render();
@@ -649,11 +1098,115 @@
     `;
   }
 
+  function openModal(content, onReady) {
+    closeModal();
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    backdrop.id = "appModal";
+    backdrop.innerHTML = content;
+    document.body.appendChild(backdrop);
+    document.body.classList.add("modal-open");
+
+    const close = () => closeModal();
+    backdrop.addEventListener("click", (event) => {
+      if (event.target === backdrop) close();
+    });
+    backdrop.querySelectorAll("[data-close-modal]").forEach((button) => {
+      button.addEventListener("click", close);
+    });
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") close();
+    };
+    backdrop._modalKeyHandler = onKeyDown;
+    document.addEventListener("keydown", onKeyDown);
+
+    if (onReady) onReady(backdrop, close);
+  }
+
+  function closeModal() {
+    const existing = document.getElementById("appModal");
+    if (!existing) return;
+    if (existing._modalKeyHandler) {
+      document.removeEventListener("keydown", existing._modalKeyHandler);
+    }
+    existing.remove();
+    document.body.classList.remove("modal-open");
+  }
+
+  function openRenameTeamDialog(team) {
+    openModal(`
+      <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="renameTitle">
+        <p class="eyebrow">Team settings</p>
+        <h2 id="renameTitle">Rename team</h2>
+        <form id="renameTeamForm">
+          <label class="field-label" for="renameTeamInput">Team name</label>
+          <input id="renameTeamInput" type="text" maxlength="40" value="${escapeHtml(team.name)}" required>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary">Save name</button>
+          </div>
+        </form>
+      </section>
+    `, (modal, close) => {
+      const input = modal.querySelector("#renameTeamInput");
+      input.focus();
+      input.select();
+      modal.querySelector("#renameTeamForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = input.value.trim();
+        if (!name) return;
+        team.name = name;
+        saveState();
+        close();
+        renderPlayerSetup();
+      });
+    });
+  }
+
+  function openSubstitutionDialog(turn) {
+    const nextTeammate = findNextAvailableTeammate(turn);
+    const teammateDisabled = nextTeammate ? "" : "disabled";
+    const teammateText = nextTeammate
+      ? `${escapeHtml(nextTeammate.name)} throws now. ${escapeHtml(turn.coveragePlayer.name)} is queued first for ${escapeHtml(turn.team.name)}’s next turn.`
+      : "No other non-deferred teammate is currently available for this option.";
+
+    openModal(`
+      <section class="modal-card substitution-modal" role="dialog" aria-modal="true" aria-labelledby="substitutionTitle">
+        <p class="eyebrow">${escapeHtml(turn.team.name)}</p>
+        <h2 id="substitutionTitle">Substitute for ${escapeHtml(turn.coveragePlayer.name)}</h2>
+        <p class="lead modal-lead">Choose how to cover this team turn.</p>
+
+        <button type="button" class="substitution-choice" id="nextTeammateChoice" ${teammateDisabled}>
+          <span class="substitution-choice-title">Use next teammate</span>
+          <span class="substitution-choice-copy">${teammateText}</span>
+        </button>
+
+        <button type="button" class="substitution-choice" id="externalGuestChoice">
+          <span class="substitution-choice-title">Use external Guest</span>
+          <span class="substitution-choice-copy">Guest throws for ${escapeHtml(turn.coveragePlayer.name)}. The team receives the score, but the player receives no individual points or throw.</span>
+        </button>
+
+        <button type="button" class="btn btn-secondary btn-block modal-cancel" data-close-modal>Cancel</button>
+      </section>
+    `, (modal, close) => {
+      modal.querySelector("#nextTeammateChoice")?.addEventListener("click", () => {
+        close();
+        applyTeammateSubstitution(turn);
+      });
+      modal.querySelector("#externalGuestChoice").addEventListener("click", () => {
+        close();
+        applyExternalSubstitution(turn);
+      });
+    });
+  }
+
   function confirmNewGame() {
     const confirmed = window.confirm("Start a new game? The current teams and scores will be cleared.");
     if (!confirmed) return;
     state = createInitialState();
     setupError = "";
+    closeModal();
     saveState();
     render();
   }

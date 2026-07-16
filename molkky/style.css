@@ -844,3 +844,252 @@ input::placeholder {
     animation-iteration-count: 1 !important;
   }
 }
+
+.setup-team-title-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+}
+
+.setup-team-title-row .setup-team-name {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.rename-team-button {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+}
+
+.rename-team-button:hover,
+.rename-team-button:active {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.rename-team-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.round-info {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 10px;
+}
+
+.deferred-badge {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid #cfc7ba;
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.unavailable-button {
+  width: 100%;
+  min-height: 49px;
+  margin-top: 10px;
+  color: var(--muted);
+  border: 1px solid #cfc7ba;
+  background: #fff;
+}
+
+.unavailable-button:hover {
+  color: var(--ink);
+}
+
+.substitution-note {
+  position: relative;
+  z-index: 1;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+  font-weight: 750;
+}
+
+.guest-name {
+  color: #737b77 !important;
+}
+
+.guest-current-player::after {
+  border-color: #737b77;
+}
+
+.guest-roster-row {
+  background: linear-gradient(90deg, rgba(115, 123, 119, 0.06), transparent);
+}
+
+.modal-open {
+  overflow: hidden;
+}
+
+.modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  align-items: end;
+  padding: 16px;
+  background: rgba(25, 31, 28, 0.48);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.modal-card {
+  width: min(100%, 520px);
+  max-height: min(86vh, 720px);
+  margin: 0 auto;
+  padding: 22px;
+  overflow-y: auto;
+  border: 1px solid rgba(116, 107, 91, 0.2);
+  border-radius: 22px;
+  background: var(--surface-strong);
+  box-shadow: 0 24px 70px rgba(21, 27, 24, 0.3);
+}
+
+.modal-card h2 {
+  margin-bottom: 16px;
+}
+
+.modal-lead {
+  margin-bottom: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.substitution-choice {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 16px;
+  border: 1px solid #cfc7ba;
+  border-radius: 15px;
+  color: var(--ink);
+  text-align: left;
+  background: #fff;
+}
+
+.substitution-choice:hover:not(:disabled),
+.substitution-choice:active:not(:disabled) {
+  border-color: #8f978f;
+  background: #faf8f3;
+}
+
+.substitution-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.substitution-choice-title,
+.substitution-choice-copy {
+  display: block;
+}
+
+.substitution-choice-title {
+  font-weight: 900;
+}
+
+.substitution-choice-copy {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.modal-cancel {
+  margin-top: 14px;
+}
+
+.mvp-panel {
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+}
+
+.mvp-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.mvp-player {
+  min-width: min(100%, 210px);
+  padding: 12px 15px;
+  border: 2px solid var(--team-color);
+  border-radius: 14px;
+  background: var(--team-soft);
+}
+
+.mvp-name,
+.mvp-team {
+  display: block;
+}
+
+.mvp-name {
+  color: var(--team-color);
+  font-size: 1.25rem;
+  font-weight: 950;
+}
+
+.mvp-team {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.mvp-score {
+  margin-top: 15px;
+  font-size: clamp(2.4rem, 12vw, 4.5rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+@media (min-width: 620px) {
+  .modal-backdrop {
+    align-items: center;
+  }
+
+  .modal-card {
+    padding: 28px;
+  }
+}
+
+.cancel-substitution-button {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 8px;
+  color: var(--muted);
+  border: 0;
+  background: transparent;
+  font-size: 0.88rem;
+}
+
+.cancel-substitution-button:hover {
+  color: var(--ink);
+  background: rgba(104, 113, 109, 0.07);
+}
