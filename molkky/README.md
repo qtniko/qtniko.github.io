@@ -24,6 +24,7 @@ https://YOUR-USERNAME.github.io/molkky/
 - 2–10 color-coded teams named Team Red, Team Blue, and so on
 - Team names can be edited during player setup
 - Auto-fill places each new player on a team with the fewest players by default
+- Add more teams directly during player setup, up to the 10-team limit
 - A Shuffle teams button randomizes all names and evenly auto-fills the teams
 - Manual team assignment remains available
 - Strict team rotation: Team Red → Team Blue → Team Green → repeat
@@ -51,3 +52,5 @@ https://YOUR-USERNAME.github.io/molkky/
 - Replay with the same teams or reshuffle players while keeping inactive players inactive
 
 No build step or dependencies are required.
+
+- Game awards and team statistics use collapsible result sections

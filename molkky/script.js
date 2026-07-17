@@ -19,8 +19,8 @@
   ];
 
   const AWARD_CRITERIA = {
-    bestAverageMinThrows: 4,
-    consistencyMinThrows: 4,
+    bestAverageMinThrows: 3,
+    consistencyMinThrows: 3,
     comebackMinPoints: 15,
     unfortunateMinBusts: 2,
     mostMissesMinMisses: 3,
@@ -56,22 +56,25 @@
     };
   }
 
+  function createTeam(index) {
+    const style = TEAM_STYLES[index];
+    if (!style) return null;
+    const teamId = makeId("team");
+    return {
+      id: teamId,
+      name: `Team ${style.label}`,
+      color: style.color,
+      soft: style.soft,
+      total: 0,
+      currentPlayerIndex: 0,
+      deferredPlayerQueue: [],
+      guestId: `guest-${teamId}`,
+      players: []
+    };
+  }
+
   function createTeams(count) {
-    return Array.from({ length: count }, (_, index) => {
-      const style = TEAM_STYLES[index];
-      const teamId = makeId("team");
-      return {
-        id: teamId,
-        name: `Team ${style.label}`,
-        color: style.color,
-        soft: style.soft,
-        total: 0,
-        currentPlayerIndex: 0,
-        deferredPlayerQueue: [],
-        guestId: `guest-${teamId}`,
-        players: []
-      };
-    });
+    return Array.from({ length: count }, (_, index) => createTeam(index)).filter(Boolean);
   }
 
   function makeId(prefix) {
@@ -960,8 +963,8 @@
 
           ${setupError ? `<div class="notice" role="alert">${escapeHtml(setupError)}</div>` : ""}
           <div class="setup-tools">
+            <button type="button" class="btn btn-secondary" id="addTeam" ${state.teams.length >= MAX_TEAMS ? "disabled" : ""}>Add another team</button>
             <button type="button" class="btn btn-secondary" id="shuffleTeams" ${totalPlayers < 2 ? "disabled" : ""}>Shuffle teams</button>
-            <span class="helper">Randomizes every name, then evenly auto-fills the teams.</span>
           </div>
           <div class="setup-grid">${teamCards}</div>
 
@@ -1013,6 +1016,17 @@
         const team = getTeam(button.dataset.teamId);
         if (team) openRenameTeamDialog(team);
       });
+    });
+
+    document.getElementById("addTeam").addEventListener("click", () => {
+      if (state.teams.length >= MAX_TEAMS) return;
+      const team = createTeam(state.teams.length);
+      if (!team) return;
+      state.teams.push(team);
+      state.teamCount = state.teams.length;
+      setupError = "";
+      saveState();
+      renderPlayerSetup();
     });
 
     document.getElementById("shuffleTeams").addEventListener("click", shuffleTeams);
@@ -1604,9 +1618,11 @@
     if (!awards.length) return "";
 
     return `
-      <section class="panel awards-panel">
-        <p class="eyebrow">Game highlights</p>
-        <h2>Game awards</h2>
+      <details class="panel history-panel awards-panel">
+        <summary class="history-summary">
+          <span>Game awards <span class="history-count">(${awards.length})</span></span>
+          <span class="history-toggle-icon" aria-hidden="true">›</span>
+        </summary>
         <div class="award-grid">
           ${awards.map((award) => {
             const title = award.recipients.length > 1 ? award.plural : award.singular;
@@ -1629,7 +1645,7 @@
             `;
           }).join("")}
         </div>
-      </section>
+      </details>
     `;
   }
 
@@ -1708,9 +1724,11 @@
   function renderTeamStatistics() {
     const statistics = state.teams.map(getTeamStatistics);
     return `
-      <section class="panel team-statistics-panel">
-        <p class="eyebrow">Full breakdown</p>
-        <h2>Team statistics</h2>
+      <details class="panel history-panel team-statistics-panel">
+        <summary class="history-summary">
+          <span>Team statistics <span class="history-count">(${statistics.length})</span></span>
+          <span class="history-toggle-icon" aria-hidden="true">›</span>
+        </summary>
         <div class="team-statistics-list">
           ${statistics.map((stats) => {
             const mvpNames = stats.teamMvps.length
@@ -1739,7 +1757,7 @@
             `;
           }).join("")}
         </div>
-      </section>
+      </details>
     `;
   }
 
