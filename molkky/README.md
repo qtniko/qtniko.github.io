@@ -20,6 +20,7 @@ https://YOUR-USERNAME.github.io/molkky/
 
 ## Included behavior
 
+- Custom Mölkky-pin SVG favicon matching the in-page brand mark
 - 2–10 color-coded teams named Team Red, Team Blue, and so on
 - Team names can be edited during player setup
 - Auto-fill places each new player on a team with the fewest players by default
@@ -36,14 +37,15 @@ https://YOUR-USERNAME.github.io/molkky/
 - An external Guest can replace a turn without adding points or a throw to the original player's individual stats
 - Guest scoring is grouped into one gray Guest entry per team and excluded from MVP
 - A standings screen appears after every active player has completed a turn and the current team cycle is complete
-- The first team to reach exactly 50 wins, but every remaining team in that team cycle finishes its turn before the result screen
+- Reaching exactly 50 starts the final team cycle; all remaining teams finish, and every team ending that cycle on 50 shares the win
 - Going over 50 resets the team to 25
-- Individual scoring treats an over-50 reset as −25 points
-- Final MVP display based on the highest individual score
+- Individual bust scoring credits the points needed to reach 50, then applies the −25 reset penalty
+- End-game awards include mandatory MVP and Round Royals results plus qualifying unique player/team highlights
 - Persistent team scores at the top with expandable live player controls
 - Compact in-game phone layout keeps the current player and all scoring controls on one screen
 - Undo last throw, including substitution, deferred-queue, and pending-winner state
 - Local browser saving, including refresh recovery
-- Final standings, history, and score progression graph
+- Final standings, pluralized game awards, collapsible throw history, and a fully responsive score progression graph
+- Replay with the same teams or reshuffle players while keeping inactive players inactive
 
 No build step or dependencies are required.

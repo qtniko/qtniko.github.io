@@ -18,9 +18,21 @@
     { label: "Brown", color: "#76503b", soft: "#f7f0eb" }
   ];
 
+  const AWARD_CRITERIA = {
+    bestAverageMinThrows: 4,
+    consistencyMinThrows: 4,
+    comebackMinPoints: 15,
+    unfortunateMinBusts: 2,
+    mostMissesMinMisses: 3,
+    teamCarryMinShare: 0.6,
+    teamCarryMinPoints: 10,
+    teamCarryMinThrows: 3
+  };
+
   const app = document.getElementById("app");
   let selectedScore = null;
   let setupError = "";
+  let openScoreboardTeamId = null;
   let state = loadState() || createInitialState();
 
   function createInitialState() {
@@ -101,9 +113,11 @@
     if (!Array.isArray(saved.history)) saved.history = [];
     saved.history.forEach((entry) => {
       entry.isGuest = Boolean(entry.isGuest);
-      entry.contribution = Number.isFinite(entry.contribution)
-        ? entry.contribution
-        : (entry.exceededFifty ? -25 : Number(entry.score) || 0);
+      const score = Number(entry.score) || 0;
+      const previousTotal = Number(entry.previousTotal) || 0;
+      entry.contribution = entry.exceededFifty
+        ? getThrowContribution(previousTotal, score)
+        : (Number.isFinite(entry.contribution) ? entry.contribution : score);
     });
 
     if (!Array.isArray(saved.teams)) saved.teams = [];
@@ -157,6 +171,35 @@
 
   function teamVars(team) {
     return `--team-color:${team.color};--team-soft:${team.soft}`;
+  }
+
+  function parseHexColor(hex) {
+    const normalized = String(hex).replace("#", "");
+    if (!/^[0-9a-f]{6}$/i.test(normalized)) return { r: 104, g: 113, b: 109 };
+    return {
+      r: parseInt(normalized.slice(0, 2), 16),
+      g: parseInt(normalized.slice(2, 4), 16),
+      b: parseInt(normalized.slice(4, 6), 16)
+    };
+  }
+
+  function toHexChannel(value) {
+    return Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, "0");
+  }
+
+  function averageTeamColor(teams) {
+    if (!teams.length) return "#68716d";
+    const total = teams.reduce((sum, team) => {
+      const color = parseHexColor(team.color);
+      return { r: sum.r + color.r, g: sum.g + color.g, b: sum.b + color.b };
+    }, { r: 0, g: 0, b: 0 });
+    return `#${toHexChannel(total.r / teams.length)}${toHexChannel(total.g / teams.length)}${toHexChannel(total.b / teams.length)}`;
+  }
+
+  function softenColor(hex, whiteRatio = 0.9) {
+    const color = parseHexColor(hex);
+    const mix = (channel) => channel * (1 - whiteRatio) + 255 * whiteRatio;
+    return `#${toHexChannel(mix(color.r))}${toHexChannel(mix(color.g))}${toHexChannel(mix(color.b))}`;
   }
 
   function getTeam(teamId) {
@@ -337,29 +380,348 @@
     return `${value} ${Math.abs(value) === 1 ? "pt" : "pts"}`;
   }
 
+  function getThrowContribution(previousTotal, score) {
+    return previousTotal + score > 50
+      ? Math.max(0, 50 - previousTotal) - 25
+      : score;
+  }
+
   function getGuestStats(team) {
     return getPlayerStats(team.guestId);
   }
 
-  function getMvpResult() {
-    const candidates = state.teams.flatMap((team) => team.players.map((player) => ({
-      team,
-      player,
-      stats: getPlayerStats(player.id)
-    })));
+  function getRealPlayerEntries(playerId) {
+    return state.history.filter((entry) => !entry.isGuest && entry.playerId === playerId);
+  }
 
+  function getPlayerCandidates() {
+    return state.teams.flatMap((team) => team.players.map((player) => {
+      const entries = getRealPlayerEntries(player.id);
+      return {
+        id: player.id,
+        team,
+        player,
+        entries,
+        stats: {
+          throws: entries.length,
+          scored: entries.reduce((sum, entry) => sum + entry.contribution, 0),
+          rawScored: entries.reduce((sum, entry) => sum + entry.score, 0),
+          misses: entries.filter((entry) => entry.score === 0).length,
+          busts: entries.filter((entry) => entry.exceededFifty).length
+        }
+      };
+    }));
+  }
+
+  function nearlyEqual(a, b, epsilon = 1e-9) {
+    return Math.abs(a - b) <= epsilon;
+  }
+
+  function signedPointTotal(value) {
+    if (value > 0) return `+${value}`;
+    if (value < 0) return `−${Math.abs(value)}`;
+    return "0";
+  }
+
+  function makePlayerRecipients(candidates) {
+    return candidates.map((candidate) => ({
+      id: candidate.player.id,
+      name: candidate.player.name,
+      subtitle: candidate.team.name,
+      color: candidate.team.color,
+      soft: candidate.team.soft
+    }));
+  }
+
+  function makeTeamRecipients(candidates) {
+    return candidates.map((candidate) => {
+      const team = candidate.team || candidate;
+      return {
+        id: team.id,
+        name: team.name,
+        subtitle: "Team award",
+        color: team.color,
+        soft: team.soft
+      };
+    });
+  }
+
+  function getMvpAward() {
+    const candidates = getPlayerCandidates().filter((candidate) => candidate.stats.throws > 0);
     if (!candidates.length) return null;
-    candidates.sort((a, b) =>
-      b.stats.scored - a.stats.scored ||
-      a.stats.throws - b.stats.throws ||
-      a.player.name.localeCompare(b.player.name)
-    );
-
-    const bestScore = candidates[0].stats.scored;
+    const bestScore = Math.max(...candidates.map((candidate) => candidate.stats.scored));
+    const winners = candidates.filter((candidate) => candidate.stats.scored === bestScore);
     return {
-      score: bestScore,
-      winners: candidates.filter((candidate) => candidate.stats.scored === bestScore)
+      id: "mvp",
+      domain: "player",
+      mandatory: true,
+      singular: "MVP",
+      plural: "MVPs",
+      description: "Highest net individual score.",
+      criteria: "All real players with at least one throw; Guest is excluded.",
+      recipients: makePlayerRecipients(winners),
+      value: formatPointTotal(bestScore)
     };
+  }
+
+  function getBestRoundAward() {
+    const totals = new Map();
+    state.history.forEach((entry) => {
+      const key = `${entry.teamId}::${entry.round}`;
+      totals.set(key, (totals.get(key) || 0) + entry.score);
+    });
+
+    const candidates = [];
+    totals.forEach((score, key) => {
+      const [teamId, roundText] = key.split("::");
+      const team = getTeam(teamId);
+      if (team) candidates.push({ team, round: Number(roundText), score });
+    });
+
+    if (!candidates.length) {
+      const fallbackTeams = state.teams.length ? state.teams : [];
+      return fallbackTeams.length ? {
+        id: "best-round",
+        domain: "team",
+        mandatory: true,
+        singular: "Round Royals",
+        plural: "Round Royals",
+        description: "Highest combined team score in one round.",
+        criteria: "Always awarded to the top team round; raw throw scores are added together.",
+        recipients: makeTeamRecipients(fallbackTeams),
+        value: "0 pts"
+      } : null;
+    }
+
+    const bestScore = Math.max(...candidates.map((candidate) => candidate.score));
+    const winningRounds = candidates.filter((candidate) => candidate.score === bestScore);
+    const bestByTeam = new Map();
+    winningRounds.forEach((candidate) => {
+      if (!bestByTeam.has(candidate.team.id)) bestByTeam.set(candidate.team.id, candidate);
+    });
+    const winners = [...bestByTeam.values()];
+    const roundLabels = [...new Set(winners.map((winner) => winner.round))];
+    return {
+      id: "best-round",
+      domain: "team",
+      mandatory: true,
+      singular: "Round Royals",
+      plural: "Round Royals",
+      description: "Highest combined team score in one round.",
+      criteria: "Always awarded to the top team round; raw throw scores are added together.",
+      recipients: makeTeamRecipients(winners),
+      value: `${formatPointTotal(bestScore)} · ${roundLabels.length === 1 ? `Round ${roundLabels[0]}` : "Multiple rounds"}`
+    };
+  }
+
+  function getCloserAward() {
+    const winningTeamIds = new Set(getWinningTeams().map((team) => team.id));
+    const candidates = [];
+    const seenPlayers = new Set();
+    state.history.forEach((entry) => {
+      if (!entry.isGuest && entry.resultingTotal === 50 && winningTeamIds.has(entry.teamId) && !seenPlayers.has(entry.playerId)) {
+        const team = getTeam(entry.teamId);
+        const player = getPlayer(team, entry.playerId);
+        if (team && player) {
+          candidates.push({ team, player });
+          seenPlayers.add(player.id);
+        }
+      }
+    });
+    if (!candidates.length) return null;
+    return {
+      id: "closer",
+      domain: "player",
+      singular: "Closer",
+      plural: "Closers",
+      description: "Delivered a throw that put a winning team on 50.",
+      criteria: "The throw must finish a team on exactly 50; Guest throws are excluded.",
+      recipients: makePlayerRecipients(candidates),
+      value: "Final blow"
+    };
+  }
+
+  function getBestAverageAward() {
+    const candidates = getPlayerCandidates()
+      .filter((candidate) => candidate.stats.throws >= AWARD_CRITERIA.bestAverageMinThrows)
+      .map((candidate) => ({ ...candidate, average: candidate.stats.rawScored / candidate.stats.throws }));
+    if (!candidates.length) return null;
+    const best = Math.max(...candidates.map((candidate) => candidate.average));
+    const winners = candidates.filter((candidate) => nearlyEqual(candidate.average, best));
+    return {
+      id: "best-average",
+      domain: "player",
+      singular: "Hot Hand",
+      plural: "Hot Hands",
+      description: "Highest average raw score per throw.",
+      criteria: `At least ${AWARD_CRITERIA.bestAverageMinThrows} throws; bust penalties do not alter the raw throw average.`,
+      recipients: makePlayerRecipients(winners),
+      value: `${best.toFixed(1)} avg`
+    };
+  }
+
+  function getModeInfo(scores) {
+    const counts = new Map();
+    scores.forEach((score) => counts.set(score, (counts.get(score) || 0) + 1));
+    const highestFrequency = Math.max(0, ...counts.values());
+    return {
+      highestFrequency,
+      modes: [...counts.entries()].filter(([, count]) => count === highestFrequency).map(([score]) => score)
+    };
+  }
+
+  function getConsistencyAward() {
+    const candidates = getPlayerCandidates()
+      .filter((candidate) => candidate.stats.throws >= AWARD_CRITERIA.consistencyMinThrows)
+      .map((candidate) => {
+        const scores = candidate.entries.map((entry) => entry.score);
+        const modeInfo = getModeInfo(scores);
+        const mean = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+        const variance = scores.reduce((sum, score) => sum + ((score - mean) ** 2), 0) / scores.length;
+        return { ...candidate, modeInfo, deviation: Math.sqrt(variance) };
+      })
+      .filter((candidate) => !candidate.modeInfo.modes.includes(0));
+    if (!candidates.length) return null;
+    const best = Math.min(...candidates.map((candidate) => candidate.deviation));
+    const winners = candidates.filter((candidate) => nearlyEqual(candidate.deviation, best));
+    return {
+      id: "consistency",
+      domain: "player",
+      singular: "Steady Hand",
+      plural: "Steady Hands",
+      description: "Smallest variation between raw throw scores.",
+      criteria: `At least ${AWARD_CRITERIA.consistencyMinThrows} throws, and 0 must not be one of the player’s modes.`,
+      recipients: makePlayerRecipients(winners),
+      value: `${best.toFixed(2)} spread`
+    };
+  }
+
+  function getMostUnfortunateAward() {
+    const candidates = state.teams
+      .map((team) => ({
+        team,
+        busts: state.history.filter((entry) => entry.teamId === team.id && entry.exceededFifty).length
+      }))
+      .filter((candidate) => candidate.busts >= AWARD_CRITERIA.unfortunateMinBusts);
+    if (!candidates.length) return null;
+    const mostBusts = Math.max(...candidates.map((candidate) => candidate.busts));
+    const winners = candidates.filter((candidate) => candidate.busts === mostBusts);
+    return {
+      id: "unfortunate",
+      domain: "team",
+      singular: "Bust Brigade",
+      plural: "Bust Brigades",
+      description: "Most team resets from going over 50.",
+      criteria: `At least ${AWARD_CRITERIA.unfortunateMinBusts} over-50 resets by the team.`,
+      recipients: makeTeamRecipients(winners),
+      value: `${mostBusts} ${mostBusts === 1 ? "bust" : "busts"}`
+    };
+  }
+
+  function getMostMissesAward() {
+    const candidates = getPlayerCandidates().filter((candidate) => candidate.stats.misses >= AWARD_CRITERIA.mostMissesMinMisses);
+    if (!candidates.length) return null;
+    const mostMisses = Math.max(...candidates.map((candidate) => candidate.stats.misses));
+    const winners = candidates.filter((candidate) => candidate.stats.misses === mostMisses);
+    return {
+      id: "misses",
+      domain: "player",
+      singular: "Pin Dodger",
+      plural: "Pin Dodgers",
+      description: "Recorded the most zero-point throws.",
+      criteria: `At least ${AWARD_CRITERIA.mostMissesMinMisses} misses.`,
+      recipients: makePlayerRecipients(winners),
+      value: `${mostMisses} ${mostMisses === 1 ? "miss" : "misses"}`
+    };
+  }
+
+  function getTeamCarryAward() {
+    const candidates = getPlayerCandidates()
+      .filter((candidate) => candidate.team.total > 0)
+      .map((candidate) => ({ ...candidate, share: candidate.stats.scored / candidate.team.total }))
+      .filter((candidate) =>
+        candidate.stats.throws >= AWARD_CRITERIA.teamCarryMinThrows &&
+        candidate.stats.scored >= AWARD_CRITERIA.teamCarryMinPoints &&
+        candidate.share >= AWARD_CRITERIA.teamCarryMinShare
+      );
+    if (!candidates.length) return null;
+    const best = Math.max(...candidates.map((candidate) => candidate.share));
+    const winners = candidates.filter((candidate) => nearlyEqual(candidate.share, best));
+    return {
+      id: "team-carry",
+      domain: "player",
+      singular: "Team Engine",
+      plural: "Team Engines",
+      description: "Contributed the largest share of their team’s net score.",
+      criteria: `At least ${Math.round(AWARD_CRITERIA.teamCarryMinShare * 100)}% of the team score, ${AWARD_CRITERIA.teamCarryMinPoints} net points, and ${AWARD_CRITERIA.teamCarryMinThrows} throws.`,
+      recipients: makePlayerRecipients(winners),
+      value: `${Math.round(best * 100)}% share`
+    };
+  }
+
+  function getComebackAward() {
+    const runningTotals = new Map(state.teams.map((team) => [team.id, 0]));
+    const maxDeficits = new Map(state.teams.map((team) => [team.id, 0]));
+    const recoveries = new Map(state.teams.map((team) => [team.id, 0]));
+
+    state.history.forEach((entry) => {
+      runningTotals.set(entry.teamId, entry.resultingTotal);
+      const leaderScore = Math.max(...runningTotals.values());
+      state.teams.forEach((team) => {
+        const deficit = leaderScore - (runningTotals.get(team.id) || 0);
+        const previousMax = maxDeficits.get(team.id) || 0;
+        maxDeficits.set(team.id, Math.max(previousMax, deficit));
+        recoveries.set(team.id, Math.max(recoveries.get(team.id) || 0, previousMax - deficit));
+      });
+    });
+
+    const candidates = state.teams
+      .map((team) => ({ team, recovery: recoveries.get(team.id) || 0 }))
+      .filter((candidate) => candidate.recovery >= AWARD_CRITERIA.comebackMinPoints);
+    if (!candidates.length) return null;
+    const best = Math.max(...candidates.map((candidate) => candidate.recovery));
+    const winners = candidates.filter((candidate) => candidate.recovery === best);
+    return {
+      id: "comeback",
+      domain: "team",
+      singular: "Comeback Crew",
+      plural: "Comeback Crews",
+      description: "Recovered from the largest deficit to the current leader.",
+      criteria: `Must erase at least ${AWARD_CRITERIA.comebackMinPoints} points of an earlier deficit.`,
+      recipients: makeTeamRecipients(winners),
+      value: `${best}-point recovery`
+    };
+  }
+
+  function selectDisplayedAwards() {
+    const mandatory = [getMvpAward(), getBestRoundAward()].filter(Boolean);
+    const optional = [
+      getCloserAward(),
+      getComebackAward(),
+      getConsistencyAward(),
+      getMostUnfortunateAward(),
+      getBestAverageAward(),
+      getTeamCarryAward(),
+      getMostMissesAward()
+    ].filter(Boolean);
+
+    const usedPlayers = new Set();
+    const usedTeams = new Set();
+    const displayed = [];
+
+    const addAward = (award, mandatoryAward = false) => {
+      const used = award.domain === "player" ? usedPlayers : usedTeams;
+      const recipients = mandatoryAward
+        ? award.recipients
+        : award.recipients.filter((recipient) => !used.has(recipient.id));
+      if (!recipients.length) return;
+      recipients.forEach((recipient) => used.add(recipient.id));
+      displayed.push({ ...award, recipients });
+    };
+
+    mandatory.forEach((award) => addAward(award, true));
+    optional.forEach((award) => addAward(award, false));
+    return displayed;
   }
 
   function render() {
@@ -653,7 +1015,7 @@
           ${state.teams.map((team) => {
             const guestStats = getGuestStats(team);
             return `
-              <details class="score-team" style="${teamVars(team)}" data-team-details="${team.id}">
+              <details class="score-team" style="${teamVars(team)}" data-team-details="${team.id}" ${openScoreboardTeamId === team.id || openScoreboardTeamId === "__all__" ? "open" : ""}>
                 <summary>
                   <span class="score-name">${escapeHtml(team.name)}</span>
                   <span class="score-number">${team.total}</span>
@@ -693,13 +1055,34 @@
     `;
   }
 
-  function bindScoreboardControls(editable = false) {
+  function bindScoreboardControls(editable = false, synchronizeAll = false) {
+    let synchronizing = false;
     document.querySelectorAll("[data-team-details]").forEach((details) => {
       details.addEventListener("toggle", () => {
-        if (!details.open) return;
-        document.querySelectorAll("[data-team-details]").forEach((other) => {
-          if (other !== details) other.open = false;
-        });
+        if (synchronizing) return;
+        const teamId = details.dataset.teamDetails;
+
+        if (synchronizeAll) {
+          const shouldOpen = details.open;
+          const allDetails = [...document.querySelectorAll("[data-team-details]")];
+          const alreadySynchronized = allDetails.every((other) => other.open === shouldOpen);
+          openScoreboardTeamId = shouldOpen ? "__all__" : null;
+          if (!alreadySynchronized) {
+            synchronizing = true;
+            allDetails.forEach((other) => { other.open = shouldOpen; });
+            synchronizing = false;
+          }
+          return;
+        }
+
+        if (details.open) {
+          openScoreboardTeamId = teamId;
+          document.querySelectorAll("[data-team-details]").forEach((other) => {
+            if (other !== details) other.open = false;
+          });
+        } else if (openScoreboardTeamId === teamId) {
+          openScoreboardTeamId = null;
+        }
       });
     });
 
@@ -709,6 +1092,7 @@
       button.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
+        openScoreboardTeamId = button.dataset.teamId;
         toggleLivePlayer(button.dataset.teamId, button.dataset.playerId);
       });
     });
@@ -717,6 +1101,7 @@
       button.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
+        openScoreboardTeamId = button.dataset.teamId;
         const team = getTeam(button.dataset.teamId);
         if (team) openAddPlayerDialog(team);
       });
@@ -1010,7 +1395,7 @@
     const rawTotal = previousTotal + score;
     const exceededFifty = rawTotal > 50;
     const resultingTotal = exceededFifty ? 25 : rawTotal;
-    const contribution = exceededFifty ? -25 : score;
+    const contribution = getThrowContribution(previousTotal, score);
     const turnStateBefore = clonePlain(state.pendingTurnSnapshot) || captureTurnState();
 
     team.total = resultingTotal;
@@ -1071,6 +1456,11 @@
     return [...state.teams].sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
   }
 
+  function getWinningTeams() {
+    const exactWinners = state.teams.filter((team) => team.total === 50);
+    return exactWinners.length ? exactWinners : [getRankedTeams()[0]].filter(Boolean);
+  }
+
   function standingsMarkup() {
     return `
       <ol class="standings-list">
@@ -1116,49 +1506,110 @@
     document.getElementById("newGame").addEventListener("click", confirmNewGame);
   }
 
-  function renderMvp() {
-    const mvp = getMvpResult();
-    if (!mvp) return "";
-    const tie = mvp.winners.length > 1;
+  function renderAwards() {
+    const awards = selectDisplayedAwards();
+    if (!awards.length) return "";
 
     return `
-      <section class="panel mvp-panel">
-        <p class="eyebrow">${tie ? "MVP tie" : "Most valuable player"}</p>
-        <h2>${tie ? "MVPs" : "MVP"}</h2>
-        <div class="mvp-list">
-          ${mvp.winners.map(({ team, player }) => `
-            <div class="mvp-player" style="${teamVars(team)}">
-              <span class="mvp-name">${escapeHtml(player.name)}</span>
-              <span class="mvp-team">${escapeHtml(team.name)}</span>
-            </div>
-          `).join("")}
+      <section class="panel awards-panel">
+        <p class="eyebrow">Game highlights</p>
+        <h2>Game awards</h2>
+        <div class="award-grid">
+          ${awards.map((award) => {
+            const title = award.recipients.length > 1 ? award.plural : award.singular;
+            return `
+              <article class="award-card ${award.mandatory ? "mandatory-award" : ""}">
+                <div class="award-heading">
+                  <h3>${escapeHtml(title)}</h3>
+                  <strong class="award-value">${escapeHtml(award.value)}</strong>
+                </div>
+                <p class="award-description">${escapeHtml(award.description)}</p>
+                <div class="award-recipient-list">
+                  ${award.recipients.map((recipient) => `
+                    <div class="award-recipient" style="--team-color:${recipient.color};--team-soft:${recipient.soft}">
+                      <span class="award-recipient-name">${escapeHtml(recipient.name)}</span>
+                      <span class="award-recipient-team">${escapeHtml(recipient.subtitle)}</span>
+                    </div>
+                  `).join("")}
+                </div>
+                <p class="award-criteria">${escapeHtml(award.criteria)}</p>
+              </article>
+            `;
+          }).join("")}
         </div>
-        <div class="mvp-score">${formatPointTotal(mvp.score)}</div>
-        <p class="helper">Over-50 resets count as −25 points for individual scoring. Guest throws are excluded.</p>
       </section>
     `;
   }
 
+  function resetForReplay({ shufflePlayers = false } = {}) {
+    if (shufflePlayers) {
+      const activePlayers = shuffleArray(state.teams.flatMap((team) => team.players.filter((player) => player.active !== false)));
+      const inactivePlayers = shuffleArray(state.teams.flatMap((team) => team.players.filter((player) => player.active === false)));
+
+      state.teams.forEach((team) => {
+        team.players = [];
+      });
+
+      activePlayers.forEach((player) => {
+        getAutoFillTeam()?.players.push(player);
+      });
+      inactivePlayers.forEach((player) => {
+        getAutoFillTeam()?.players.push(player);
+      });
+    }
+
+    state.teams.forEach((team) => {
+      team.total = 0;
+      team.currentPlayerIndex = 0;
+      team.deferredPlayerQueue = [];
+      team.players.forEach((player) => { player.hasPlayed = false; });
+    });
+    state.round = 1;
+    state.currentTeamIndex = 0;
+    state.roundThrowIndex = 0;
+    state.standingsPending = false;
+    state.history = [];
+    state.winnerId = null;
+    state.turnOverride = null;
+    state.pendingTurnSnapshot = null;
+    state.view = "game";
+    openScoreboardTeamId = null;
+    saveState();
+    render();
+  }
+
   function renderFinished() {
-    const winner = getTeam(state.winnerId) || getRankedTeams()[0];
+    openScoreboardTeamId = null;
+    const winners = getWinningTeams();
+    const multipleWinners = winners.length > 1;
+    const blendedColor = averageTeamColor(winners);
+    const blendedSoft = softenColor(blendedColor);
     const latestFirst = [...state.history].reverse();
+    const winnerNames = winners.map((team) => team.name);
 
     app.innerHTML = `
       <main class="app-shell with-scoreboard">
         ${renderScoreboard(false)}
 
-        <section class="winner-banner" style="${teamVars(winner)}">
-          <p class="eyebrow">First team to exactly 50 points</p>
-          <div class="winner-name">${escapeHtml(winner.name)} wins</div>
-          <p class="lead" style="margin:10px 0 0">Final score: <strong>${winner.total}</strong></p>
+        <section class="winner-banner" style="--team-color:${blendedColor};--team-soft:${blendedSoft}">
+          <p class="eyebrow">${multipleWinners ? "Multiple teams reached exactly 50" : "Exactly 50 points"}</p>
+          <div class="winner-name">${multipleWinners ? "We have multiple winners" : `${escapeHtml(winnerNames[0])} wins`}</div>
+          ${multipleWinners ? `
+            <div class="winner-team-list">
+              ${winners.map((team) => `
+                <span class="winner-team-chip" style="${teamVars(team)}">${escapeHtml(team.name)}</span>
+              `).join("")}
+            </div>
+          ` : ""}
+          <p class="lead" style="margin:10px 0 0">Final score: <strong>50</strong></p>
         </section>
-
-        ${renderMvp()}
 
         <section class="panel">
           <h2>Final standings</h2>
           ${standingsMarkup()}
         </section>
+
+        ${renderAwards()}
 
         <section class="panel">
           <h2>Score progression</h2>
@@ -1166,14 +1617,15 @@
           ${renderChart()}
         </section>
 
-        <section class="panel">
-          <h2>Throw history</h2>
+        <details class="panel history-panel">
+          <summary class="history-summary">
+            <span>Throw history <span class="history-count">(${state.history.length})</span></span>
+            <span class="history-toggle-icon" aria-hidden="true">›</span>
+          </summary>
           <ul class="history-list">
             ${latestFirst.map((entry) => {
               const team = getTeam(entry.teamId);
-              const contributionLabel = entry.contribution === entry.score
-                ? `+${entry.score}`
-                : "−25";
+              const contributionLabel = signedPointTotal(entry.contribution);
               return `
                 <li class="history-item" style="${teamVars(team)}">
                   <div class="history-main">
@@ -1186,37 +1638,23 @@
               `;
             }).join("")}
           </ul>
-        </section>
+        </details>
 
         <section class="panel">
           <div class="button-row" style="margin-top:0">
             <button type="button" class="btn btn-primary" id="playAgain">Play again with same teams</button>
-            <button type="button" class="btn btn-secondary" id="undoThrow">Undo winning throw</button>
+            <button type="button" class="btn btn-secondary" id="shuffleAndPlayAgain">Shuffle teams & play again</button>
+            <button type="button" class="btn btn-secondary" id="undoThrow">Undo final throw</button>
             <button type="button" class="btn btn-secondary" id="newGame">Create a new game</button>
           </div>
         </section>
       </main>
     `;
 
-    document.getElementById("playAgain").addEventListener("click", () => {
-      state.teams.forEach((team) => {
-        team.total = 0;
-        team.currentPlayerIndex = 0;
-        team.deferredPlayerQueue = [];
-        team.players.forEach((player) => { player.hasPlayed = false; });
-      });
-      state.round = 1;
-      state.currentTeamIndex = 0;
-      state.roundThrowIndex = 0;
-      state.standingsPending = false;
-      state.history = [];
-      state.winnerId = null;
-      state.turnOverride = null;
-      state.pendingTurnSnapshot = null;
-      state.view = "game";
-      saveState();
-      render();
-    });
+    bindScoreboardControls(false, true);
+
+    document.getElementById("playAgain").addEventListener("click", () => resetForReplay());
+    document.getElementById("shuffleAndPlayAgain").addEventListener("click", () => resetForReplay({ shufflePlayers: true }));
     document.getElementById("undoThrow").addEventListener("click", undoLastThrow);
     document.getElementById("newGame").addEventListener("click", confirmNewGame);
   }
@@ -1265,7 +1703,7 @@
 
     return `
       <div class="chart-wrap">
-        <svg class="score-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Team score progression graph">
+        <svg class="score-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Team score progression graph">
           ${gridLines}
           <line x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}" stroke="#938b7f" stroke-width="1.5" />
           <line x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}" stroke="#938b7f" stroke-width="1.5" />

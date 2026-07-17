@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mölkky pin">
+  <g transform="rotate(-7 32 32)">
+    <path
+      d="M32 9 C37.523 9 42 13.477 42 19 V48 C42 51.314 39.314 54 36 54 H28 C24.686 54 22 51.314 22 48 V19 C22 13.477 26.477 9 32 9 Z"
+      fill="#f5efe3"
+      stroke="#202924"
+      stroke-width="4"
+      stroke-linejoin="round"
+    />
+  </g>
+</svg>
