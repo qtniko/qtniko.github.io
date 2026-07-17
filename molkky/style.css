@@ -2004,6 +2004,7 @@ input::placeholder {
   z-index: 80;
   top: calc(8px + env(safe-area-inset-top));
   right: 10px;
+  display: none !Important
 }
 
 .language-picker select {
