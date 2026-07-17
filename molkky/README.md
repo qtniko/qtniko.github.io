@@ -21,6 +21,8 @@ https://YOUR-USERNAME.github.io/molkky/
 ## Included behavior
 
 - Custom Mölkky-pin SVG favicon matching the in-page brand mark
+- English and Norwegian display languages, switchable at any point with a compact selector
+- Default team names, controls, dialogs, statistics, accessibility labels, and award titles follow the selected language
 - 2–10 color-coded teams named Team Red, Team Blue, and so on
 - Team names can be edited during player setup
 - Auto-fill places each new player on a team with the fewest players by default
@@ -51,6 +53,6 @@ https://YOUR-USERNAME.github.io/molkky/
 - Session rematch history appears after a second completed game
 - Replay with the same teams or reshuffle players while keeping inactive players inactive
 
-No build step or dependencies are required.
-
 - Game awards and team statistics use collapsible result sections
+
+No build step or dependencies are required.
