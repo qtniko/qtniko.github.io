@@ -34,7 +34,7 @@
       standingsPending: false,
       history: [],
       winnerId: null,
-      selectedSetupTeamId: null,
+      selectedSetupTeamId: "auto",
       turnOverride: null,
       pendingTurnSnapshot: null
     };
@@ -89,6 +89,8 @@
       ? saved.roundThrowIndex
       : 0;
     saved.standingsPending = Boolean(saved.standingsPending);
+    saved.winnerId = saved.winnerId || null;
+    saved.selectedSetupTeamId = saved.selectedSetupTeamId || "auto";
     saved.turnOverride = saved.turnOverride && typeof saved.turnOverride === "object"
       ? saved.turnOverride
       : null;
@@ -115,18 +117,18 @@
         : [];
       if (!Array.isArray(team.players)) team.players = [];
 
-      const validPlayerIds = new Set(team.players.map((player) => player.id));
-      team.deferredPlayerQueue = team.deferredPlayerQueue.filter((playerId) => validPlayerIds.has(playerId));
+      team.players.forEach((player) => {
+        player.hasPlayed = Boolean(player.hasPlayed);
+        player.active = player.active !== false;
+      });
+
+      cleanDeferredQueueForTeamData(team);
 
       if (team.players.length) {
         team.currentPlayerIndex = ((team.currentPlayerIndex % team.players.length) + team.players.length) % team.players.length;
       } else {
         team.currentPlayerIndex = 0;
       }
-
-      team.players.forEach((player) => {
-        player.hasPlayed = Boolean(player.hasPlayed);
-      });
     });
 
     if (saved.teams.length) {
@@ -137,6 +139,11 @@
 
     delete saved.currentTurnIndex;
     return saved;
+  }
+
+  function cleanDeferredQueueForTeamData(team) {
+    const activeIds = new Set(team.players.filter((player) => player.active !== false).map((player) => player.id));
+    team.deferredPlayerQueue = [...new Set(team.deferredPlayerQueue || [])].filter((playerId) => activeIds.has(playerId));
   }
 
   function escapeHtml(value) {
@@ -169,16 +176,30 @@
   }
 
   function cleanDeferredQueue(team) {
-    const validIds = new Set(team.players.map((player) => player.id));
-    team.deferredPlayerQueue = [...new Set(team.deferredPlayerQueue)].filter((playerId) => validIds.has(playerId));
+    cleanDeferredQueueForTeamData(team);
+  }
+
+  function getActivePlayers(team) {
+    return team.players.filter((player) => player.active !== false);
+  }
+
+  function getNextActivePlayerIndex(team, startIndex = 0, excludedIds = new Set()) {
+    if (!team.players.length) return -1;
+
+    for (let offset = 0; offset < team.players.length; offset += 1) {
+      const index = (startIndex + offset + team.players.length) % team.players.length;
+      const player = team.players[index];
+      if (player.active !== false && !excludedIds.has(player.id)) return index;
+    }
+    return -1;
   }
 
   function getBaseTurn(team) {
-    if (!team || !team.players.length) return null;
+    if (!team || !getActivePlayers(team).length) return null;
     cleanDeferredQueue(team);
 
     const deferredPlayer = getPlayer(team, team.deferredPlayerQueue[0]);
-    if (deferredPlayer) {
+    if (deferredPlayer && deferredPlayer.active !== false) {
       return {
         team,
         actor: deferredPlayer,
@@ -189,11 +210,11 @@
       };
     }
 
-    if (team.currentPlayerIndex >= team.players.length) {
-      team.currentPlayerIndex = 0;
-    }
+    const nextIndex = getNextActivePlayerIndex(team, team.currentPlayerIndex);
+    if (nextIndex < 0) return null;
+    team.currentPlayerIndex = nextIndex;
 
-    const player = team.players[team.currentPlayerIndex];
+    const player = team.players[nextIndex];
     return {
       team,
       actor: player,
@@ -211,7 +232,7 @@
     const override = state.turnOverride;
     if (override && override.teamId === team.id) {
       const coveragePlayer = getPlayer(team, override.coveragePlayerId);
-      if (!coveragePlayer) {
+      if (!coveragePlayer || coveragePlayer.active === false) {
         state.turnOverride = null;
         state.pendingTurnSnapshot = null;
         return getBaseTurn(team);
@@ -221,7 +242,7 @@
         ? getGuest(team)
         : getPlayer(team, override.actorPlayerId);
 
-      if (!actor) {
+      if (!actor || (override.actorType !== "guest" && actor.active === false)) {
         state.turnOverride = null;
         state.pendingTurnSnapshot = null;
         return getBaseTurn(team);
@@ -242,9 +263,8 @@
   }
 
   function allPlayersHavePlayed() {
-    return state.teams.length > 0 && state.teams.every((team) =>
-      team.players.length > 0 && team.players.every((player) => player.hasPlayed)
-    );
+    const activePlayers = state.teams.flatMap((team) => getActivePlayers(team));
+    return activePlayers.length > 0 && activePlayers.every((player) => player.hasPlayed);
   }
 
   function resetPlayedMarkers() {
@@ -264,6 +284,7 @@
       currentTeamIndex: state.currentTeamIndex,
       roundThrowIndex: state.roundThrowIndex,
       standingsPending: state.standingsPending,
+      winnerId: state.winnerId,
       turnOverride: clonePlain(state.turnOverride),
       teams: state.teams.map((team) => ({
         teamId: team.id,
@@ -283,6 +304,7 @@
     state.currentTeamIndex = Number.isInteger(snapshot.currentTeamIndex) ? snapshot.currentTeamIndex : 0;
     state.roundThrowIndex = Number.isInteger(snapshot.roundThrowIndex) ? snapshot.roundThrowIndex : 0;
     state.standingsPending = Boolean(snapshot.standingsPending);
+    state.winnerId = snapshot.winnerId || null;
     state.turnOverride = clonePlain(snapshot.turnOverride) || null;
     state.pendingTurnSnapshot = null;
 
@@ -409,7 +431,7 @@
 
     document.getElementById("continueToPlayers").addEventListener("click", () => {
       state.teams = createTeams(state.teamCount);
-      state.selectedSetupTeamId = state.teams[0]?.id || null;
+      state.selectedSetupTeamId = "auto";
       state.view = "players";
       setupError = "";
       saveState();
@@ -425,11 +447,51 @@
     `;
   }
 
-  function renderPlayerSetup() {
-    const teamOptions = state.teams
-      .map((team) => `<option value="${team.id}" ${team.id === state.selectedSetupTeamId ? "selected" : ""}>${escapeHtml(team.name)}</option>`)
-      .join("");
+  function getAutoFillTeam() {
+    if (!state.teams.length) return null;
+    return [...state.teams].sort((a, b) => a.players.length - b.players.length || state.teams.indexOf(a) - state.teams.indexOf(b))[0];
+  }
 
+  function shuffleArray(values) {
+    for (let index = values.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [values[index], values[swapIndex]] = [values[swapIndex], values[index]];
+    }
+    return values;
+  }
+
+  function shuffleTeams() {
+    const players = shuffleArray(state.teams.flatMap((team) => team.players));
+    state.teams.forEach((team) => {
+      team.players = [];
+      team.currentPlayerIndex = 0;
+      team.deferredPlayerQueue = [];
+    });
+
+    players.forEach((player) => {
+      player.hasPlayed = false;
+      player.active = true;
+      getAutoFillTeam()?.players.push(player);
+    });
+
+    setupError = "";
+    saveState();
+    renderPlayerSetup();
+  }
+
+  function renderPlayerSetup() {
+    if (!state.selectedSetupTeamId || (state.selectedSetupTeamId !== "auto" && !getTeam(state.selectedSetupTeamId))) {
+      state.selectedSetupTeamId = "auto";
+    }
+
+    const teamOptions = `
+      <option value="auto" ${state.selectedSetupTeamId === "auto" ? "selected" : ""}>Auto-fill · fewest players</option>
+      ${state.teams
+        .map((team) => `<option value="${team.id}" ${team.id === state.selectedSetupTeamId ? "selected" : ""}>${escapeHtml(team.name)}</option>`)
+        .join("")}
+    `;
+
+    const totalPlayers = state.teams.reduce((sum, team) => sum + team.players.length, 0);
     const teamCards = state.teams.map((team) => {
       const players = team.players.length
         ? `<ul class="player-list">${team.players.map((player) => `
@@ -458,11 +520,11 @@
 
     app.innerHTML = `
       <main class="app-shell">
-        ${renderBrand("Add every player to the team you choose. Nothing is distributed automatically.")}
+        ${renderBrand("Add players automatically to the smallest team, or choose a team manually.")}
         <section class="panel">
           <p class="eyebrow">Stage 2 of 3</p>
           <h1>Add the players</h1>
-          <p class="lead">Type a name, choose the correct team, and add the player. Uneven team sizes are completely fine.</p>
+          <p class="lead">Auto-fill is selected by default and always places the next player on a team with the fewest players. You can still select a specific team whenever needed.</p>
 
           <form id="playerForm" autocomplete="off">
             <div class="input-row">
@@ -471,7 +533,7 @@
                 <input id="playerName" name="playerName" type="text" maxlength="40" placeholder="Enter a name" required autofocus>
               </div>
               <div>
-                <label class="field-label" for="teamSelect">Team</label>
+                <label class="field-label" for="teamSelect">Team assignment</label>
                 <select id="teamSelect" name="teamSelect">${teamOptions}</select>
               </div>
               <button type="submit" class="btn btn-primary">Add player</button>
@@ -479,6 +541,10 @@
           </form>
 
           ${setupError ? `<div class="notice" role="alert">${escapeHtml(setupError)}</div>` : ""}
+          <div class="setup-tools">
+            <button type="button" class="btn btn-secondary" id="shuffleTeams" ${totalPlayers < 2 ? "disabled" : ""}>Shuffle teams</button>
+            <span class="helper">Randomizes every name, then evenly auto-fills the teams.</span>
+          </div>
           <div class="setup-grid">${teamCards}</div>
 
           <div class="button-row">
@@ -500,12 +566,12 @@
       const nameInput = document.getElementById("playerName");
       const teamSelect = document.getElementById("teamSelect");
       const name = nameInput.value.trim();
-      const team = getTeam(teamSelect.value);
       state.selectedSetupTeamId = teamSelect.value;
+      const team = teamSelect.value === "auto" ? getAutoFillTeam() : getTeam(teamSelect.value);
 
       if (!name || !team) return;
 
-      team.players.push({ id: makeId("player"), name, hasPlayed: false });
+      team.players.push({ id: makeId("player"), name, hasPlayed: false, active: true });
       setupError = "";
       saveState();
       renderPlayerSetup();
@@ -531,10 +597,12 @@
       });
     });
 
+    document.getElementById("shuffleTeams").addEventListener("click", shuffleTeams);
+
     document.getElementById("backToTeamCount").addEventListener("click", () => {
       state.view = "teamCount";
       state.teams = [];
-      state.selectedSetupTeamId = null;
+      state.selectedSetupTeamId = "auto";
       setupError = "";
       saveState();
       render();
@@ -561,7 +629,10 @@
         team.total = 0;
         team.currentPlayerIndex = 0;
         team.deferredPlayerQueue = [];
-        team.players.forEach((player) => { player.hasPlayed = false; });
+        team.players.forEach((player) => {
+          player.hasPlayed = false;
+          player.active = true;
+        });
       });
       setupError = "";
       saveState();
@@ -569,35 +640,51 @@
     });
   }
 
-  function renderScoreboard() {
+  function activePlayerIcon(active) {
+    return active
+      ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0v1H5v-1Zm14-8h5v2h-5v-2Z" fill="currentColor"/></svg>`
+      : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0v1H5v-1Zm15-8v-3h2v3h3v2h-3v3h-2v-3h-3v-2h3Z" fill="currentColor"/></svg>`;
+  }
+
+  function renderScoreboard(editable = false) {
     return `
-      <div class="scoreboard-wrap">
+      <div class="scoreboard-wrap ${editable ? "editable-scoreboard" : ""}">
         <div class="scoreboard" aria-label="Team scores">
           ${state.teams.map((team) => {
             const guestStats = getGuestStats(team);
             return `
-              <details class="score-team" style="${teamVars(team)}">
+              <details class="score-team" style="${teamVars(team)}" data-team-details="${team.id}">
                 <summary>
                   <span class="score-name">${escapeHtml(team.name)}</span>
                   <span class="score-number">${team.total}</span>
                 </summary>
-                <ul class="score-roster">
-                  ${team.players.map((player) => {
-                    const stats = getPlayerStats(player.id);
-                    return `
-                      <li>
-                        <span class="score-roster-name">${escapeHtml(player.name)}</span>
-                        <span class="score-roster-stat">${formatPointTotal(stats.scored)} · ${stats.throws} ${stats.throws === 1 ? "throw" : "throws"}</span>
+                <div class="score-roster-panel">
+                  <ul class="score-roster">
+                    ${team.players.map((player) => {
+                      const stats = getPlayerStats(player.id);
+                      const active = player.active !== false;
+                      return `
+                        <li class="score-roster-row ${active ? "" : "inactive-player-row"}">
+                          <span class="score-roster-name">${escapeHtml(player.name)}</span>
+                          <span class="score-roster-stat">${formatPointTotal(stats.scored)} · ${stats.throws} ${stats.throws === 1 ? "throw" : "throws"}</span>
+                          ${editable ? `
+                            <button type="button" class="roster-toggle-button" data-team-id="${team.id}" data-player-id="${player.id}" aria-label="${active ? "Remove" : "Return"} ${escapeHtml(player.name)} ${active ? "from" : "to"} the game" title="${active ? "Mark unavailable" : "Return to game"}">
+                              ${activePlayerIcon(active)}
+                            </button>
+                          ` : ""}
+                        </li>
+                      `;
+                    }).join("")}
+                    ${guestStats.throws ? `
+                      <li class="score-roster-row guest-roster-row">
+                        <span class="score-roster-name guest-name">Guest</span>
+                        <span class="score-roster-stat">${formatPointTotal(guestStats.scored)} · ${guestStats.throws} ${guestStats.throws === 1 ? "throw" : "throws"}</span>
+                        ${editable ? `<span class="roster-button-spacer" aria-hidden="true"></span>` : ""}
                       </li>
-                    `;
-                  }).join("")}
-                  ${guestStats.throws ? `
-                    <li class="guest-roster-row">
-                      <span class="score-roster-name guest-name">Guest</span>
-                      <span class="score-roster-stat">${formatPointTotal(guestStats.scored)} · ${guestStats.throws} ${guestStats.throws === 1 ? "throw" : "throws"}</span>
-                    </li>
-                  ` : ""}
-                </ul>
+                    ` : ""}
+                  </ul>
+                  ${editable ? `<button type="button" class="add-live-player-button" data-team-id="${team.id}">Add player</button>` : ""}
+                </div>
               </details>
             `;
           }).join("")}
@@ -606,24 +693,106 @@
     `;
   }
 
+  function bindScoreboardControls(editable = false) {
+    document.querySelectorAll("[data-team-details]").forEach((details) => {
+      details.addEventListener("toggle", () => {
+        if (!details.open) return;
+        document.querySelectorAll("[data-team-details]").forEach((other) => {
+          if (other !== details) other.open = false;
+        });
+      });
+    });
+
+    if (!editable) return;
+
+    document.querySelectorAll(".roster-toggle-button").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleLivePlayer(button.dataset.teamId, button.dataset.playerId);
+      });
+    });
+
+    document.querySelectorAll(".add-live-player-button").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const team = getTeam(button.dataset.teamId);
+        if (team) openAddPlayerDialog(team);
+      });
+    });
+  }
+
   function willCompleteCoverage(turn) {
     const targetId = turn.coveragePlayer.id;
-    if (turn.coveragePlayer.hasPlayed) return false;
+    if (turn.coveragePlayer.hasPlayed || turn.coveragePlayer.active === false) return false;
     return state.teams.every((team) =>
-      team.players.every((player) => player.id === targetId || player.hasPlayed)
+      getActivePlayers(team).every((player) => player.id === targetId || player.hasPlayed)
     );
   }
 
+  function allTeamsInactive() {
+    return state.teams.every((team) => getActivePlayers(team).length === 0);
+  }
+
+  function advanceTeamPosition() {
+    const isLastTeam = state.currentTeamIndex === state.teams.length - 1;
+
+    if (isLastTeam) {
+      state.currentTeamIndex = 0;
+      if (state.winnerId) {
+        state.view = "finished";
+        return;
+      }
+      if (state.standingsPending) {
+        resetPlayedMarkers();
+        state.standingsPending = false;
+        state.view = "standings";
+        return;
+      }
+    } else {
+      state.currentTeamIndex += 1;
+    }
+
+    state.view = "game";
+  }
+
+  function advancePastInactiveTeams() {
+    if (allTeamsInactive()) return false;
+
+    let checked = 0;
+    while (state.view === "game" && checked < state.teams.length && !getCurrentTurn()) {
+      advanceTeamPosition();
+      checked += 1;
+    }
+    return state.view === "game" && Boolean(getCurrentTurn());
+  }
+
   function renderGame() {
-    const turn = getCurrentTurn();
-    if (!turn) {
-      state.view = "players";
+    if (allTeamsInactive()) {
+      if (state.winnerId) {
+        state.view = "finished";
+        saveState();
+        render();
+        return;
+      }
+      renderNoActivePlayers();
+      return;
+    }
+
+    if (!advancePastInactiveTeams()) {
       saveState();
       render();
       return;
     }
 
-    const { team, actor, actorType, coveragePlayer, substitutionKind, substitutingForName } = turn;
+    const turn = getCurrentTurn();
+    if (!turn) {
+      renderNoActivePlayers();
+      return;
+    }
+
+    const { team, actor, actorType, substitutionKind, substitutingForName } = turn;
     const isGuest = actorType === "guest";
     const substitutionNote = substitutionKind === "guest" && substitutingForName
       ? `Throwing for ${escapeHtml(substitutingForName)}`
@@ -631,19 +800,23 @@
         ? `${escapeHtml(substitutingForName)} was deferred and is first in this team’s priority queue.`
         : "";
     const isLastTeam = state.currentTeamIndex === state.teams.length - 1;
-    const willShowStandings = isLastTeam && (state.standingsPending || willCompleteCoverage(turn));
+    const willShowStandings = !state.winnerId && isLastTeam && (state.standingsPending || willCompleteCoverage(turn));
     const queueNotice = team.deferredPlayerQueue.length
       ? `<span class="deferred-badge">${team.deferredPlayerQueue.length} deferred ${team.deferredPlayerQueue.length === 1 ? "turn" : "turns"}</span>`
       : "";
+    const finalTurnNotice = state.winnerId
+      ? `<span class="finish-badge">Final team turns</span>`
+      : "";
 
     app.innerHTML = `
-      <main class="app-shell with-scoreboard">
-        ${renderScoreboard()}
+      <main class="app-shell with-scoreboard game-screen">
+        ${renderScoreboard(true)}
 
         <div class="game-topline">
           <div class="round-info">
             <span class="round-label">Round ${state.round} · Throw ${state.roundThrowIndex + 1}</span>
             ${queueNotice}
+            ${finalTurnNotice}
           </div>
           <button type="button" class="btn btn-secondary btn-small" id="newGame">New game</button>
         </div>
@@ -658,18 +831,20 @@
 
           <section class="score-entry-panel" style="${teamVars(team)}">
             <h2 class="score-entry-title">What did they score?</h2>
-            <p class="helper" style="text-align:center">Choose 0 for a miss, or 1–12 for the throw.</p>
+            <p class="helper score-helper" style="text-align:center">Choose 0 for a miss, or 1–12 for the throw.</p>
             <div class="score-grid" role="group" aria-label="Select score">
               ${Array.from({ length: 13 }, (_, score) => `
-                <button type="button" class="score-choice" data-score="${score}" aria-pressed="false">${score === 0 ? "0 · Miss" : score}</button>
+                <button type="button" class="score-choice" data-score="${score}" aria-label="${score === 0 ? "Miss, zero points" : `${score} points`}" aria-pressed="false">${score}</button>
               `).join("")}
             </div>
             <div class="selected-score" id="selectedScoreText">Select a score</div>
             <button type="button" class="btn submit-score" id="submitScore" disabled>
-              ${willShowStandings ? "Record score & show standings" : "Record score & next player"}
+              ${state.winnerId && isLastTeam ? "Record score & finish game" : willShowStandings ? "Record score & show standings" : "Record score & next player"}
             </button>
-            ${!isGuest ? `<button type="button" class="btn unavailable-button" id="playerUnavailable">Player unavailable / substitute</button>` : ""}
-            ${state.pendingTurnSnapshot ? `<button type="button" class="btn cancel-substitution-button" id="cancelSubstitution">Cancel substitution</button>` : ""}
+            <div class="compact-secondary-actions">
+              ${!isGuest ? `<button type="button" class="btn unavailable-button" id="playerUnavailable">Player unavailable / substitute</button>` : ""}
+              ${state.pendingTurnSnapshot ? `<button type="button" class="btn cancel-substitution-button" id="cancelSubstitution">Cancel substitution</button>` : ""}
+            </div>
           </section>
         </div>
 
@@ -678,6 +853,8 @@
         </div>
       </main>
     `;
+
+    bindScoreboardControls(true);
 
     document.querySelectorAll(".score-choice").forEach((button) => {
       button.addEventListener("click", () => {
@@ -688,7 +865,16 @@
           choice.setAttribute("aria-pressed", String(active));
         });
         document.getElementById("selectedScoreText").innerHTML = `<span>Selected:</span> <strong>${selectedScore}</strong>`;
-        document.getElementById("submitScore").disabled = false;
+        const submitButton = document.getElementById("submitScore");
+        submitButton.disabled = false;
+        const reachesFifty = team.total + selectedScore === 50;
+        if (isLastTeam && (state.winnerId || reachesFifty)) {
+          submitButton.textContent = "Record score & finish game";
+        } else if (!state.winnerId && willShowStandings && !reachesFifty) {
+          submitButton.textContent = "Record score & show standings";
+        } else {
+          submitButton.textContent = "Record score & next player";
+        }
       });
     });
 
@@ -705,25 +891,35 @@
     document.getElementById("newGame").addEventListener("click", confirmNewGame);
   }
 
+  function renderNoActivePlayers() {
+    app.innerHTML = `
+      <main class="app-shell with-scoreboard game-screen no-active-screen">
+        ${renderScoreboard(true)}
+        <section class="panel no-active-panel">
+          <p class="eyebrow">Game paused</p>
+          <h1>No active players</h1>
+          <p class="lead">Open a team above and return a player to the game, or add a new player.</p>
+          <button type="button" class="btn btn-secondary" id="newGame">New game</button>
+        </section>
+      </main>
+    `;
+    bindScoreboardControls(true);
+    document.getElementById("newGame").addEventListener("click", confirmNewGame);
+  }
+
   function findNextAvailableTeammate(turn) {
     const { team, coveragePlayer, consumeSource } = turn;
-    if (team.players.length < 2) return null;
+    if (getActivePlayers(team).length < 2) return null;
 
     const currentIndex = team.players.findIndex((player) => player.id === coveragePlayer.id);
     if (currentIndex < 0) return null;
 
-    // A priority-queue turn does not move the normal team pointer. If that queued
-    // player is unavailable again, resume from the team's normally scheduled player.
     const startIndex = consumeSource === "queue"
       ? team.currentPlayerIndex
       : (currentIndex + 1) % team.players.length;
     const unavailableIds = new Set([...team.deferredPlayerQueue, coveragePlayer.id]);
-
-    for (let offset = 0; offset < team.players.length; offset += 1) {
-      const candidate = team.players[(startIndex + offset) % team.players.length];
-      if (!unavailableIds.has(candidate.id)) return candidate;
-    }
-    return null;
+    const candidateIndex = getNextActivePlayerIndex(team, startIndex, unavailableIds);
+    return candidateIndex >= 0 ? team.players[candidateIndex] : null;
   }
 
   function ensurePendingTurnSnapshot() {
@@ -843,30 +1039,16 @@
     state.pendingTurnSnapshot = null;
     state.roundThrowIndex += 1;
 
-    if (resultingTotal === 50) {
+    if (resultingTotal === 50 && !state.winnerId) {
       state.winnerId = team.id;
-      state.view = "finished";
-      saveState();
-      render();
-      return;
+      state.standingsPending = false;
     }
 
-    if (allPlayersHavePlayed()) {
+    if (!state.winnerId && allPlayersHavePlayed()) {
       state.standingsPending = true;
     }
 
-    const isLastTeam = state.currentTeamIndex === state.teams.length - 1;
-    if (isLastTeam) {
-      state.currentTeamIndex = 0;
-      if (state.standingsPending) {
-        resetPlayedMarkers();
-        state.standingsPending = false;
-        state.view = "standings";
-      }
-    } else {
-      state.currentTeamIndex += 1;
-    }
-
+    advanceTeamPosition();
     saveState();
     render();
   }
@@ -878,7 +1060,6 @@
     const team = getTeam(last.teamId);
     if (team) team.total = last.previousTotal;
 
-    state.winnerId = null;
     state.round = last.round;
     restoreTurnState(last.turnStateBefore);
     state.view = "game";
@@ -907,7 +1088,7 @@
   function renderStandings() {
     app.innerHTML = `
       <main class="app-shell with-scoreboard">
-        ${renderScoreboard()}
+        ${renderScoreboard(true)}
         <section class="panel">
           <p class="eyebrow">Round ${state.round} complete</p>
           <h1>Current standings</h1>
@@ -921,6 +1102,8 @@
         </section>
       </main>
     `;
+
+    bindScoreboardControls(true);
 
     document.getElementById("nextRound").addEventListener("click", () => {
       state.round += 1;
@@ -962,10 +1145,10 @@
 
     app.innerHTML = `
       <main class="app-shell with-scoreboard">
-        ${renderScoreboard()}
+        ${renderScoreboard(false)}
 
         <section class="winner-banner" style="${teamVars(winner)}">
-          <p class="eyebrow">Exactly 50 points</p>
+          <p class="eyebrow">First team to exactly 50 points</p>
           <div class="winner-name">${escapeHtml(winner.name)} wins</div>
           <p class="lead" style="margin:10px 0 0">Final score: <strong>${winner.total}</strong></p>
         </section>
@@ -1096,6 +1279,69 @@
         `).join("")}
       </div>
     `;
+  }
+
+  function toggleLivePlayer(teamId, playerId) {
+    const team = getTeam(teamId);
+    const player = getPlayer(team, playerId);
+    if (!team || !player) return;
+
+    const turningOff = player.active !== false;
+    player.active = !turningOff;
+
+    if (turningOff) {
+      team.deferredPlayerQueue = team.deferredPlayerQueue.filter((queuedId) => queuedId !== player.id);
+      if (state.turnOverride?.teamId === team.id && (
+        state.turnOverride.coveragePlayerId === player.id || state.turnOverride.actorPlayerId === player.id
+      )) {
+        state.turnOverride = null;
+        state.pendingTurnSnapshot = null;
+      }
+    } else {
+      player.hasPlayed = false;
+      const playerIndex = team.players.findIndex((candidate) => candidate.id === player.id);
+      if (getActivePlayers(team).length === 1 && playerIndex >= 0) {
+        team.currentPlayerIndex = playerIndex;
+      }
+    }
+
+    cleanDeferredQueue(team);
+    state.standingsPending = !state.winnerId && allPlayersHavePlayed();
+    saveState();
+    render();
+  }
+
+  function openAddPlayerDialog(team) {
+    openModal(`
+      <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="addPlayerTitle">
+        <p class="eyebrow">${escapeHtml(team.name)}</p>
+        <h2 id="addPlayerTitle">Add player</h2>
+        <form id="addLivePlayerForm">
+          <label class="field-label" for="addLivePlayerInput">Player name</label>
+          <input id="addLivePlayerInput" type="text" maxlength="40" placeholder="Enter a name" required>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary">Add player</button>
+          </div>
+        </form>
+      </section>
+    `, (modal, close) => {
+      const input = modal.querySelector("#addLivePlayerInput");
+      input.focus();
+      modal.querySelector("#addLivePlayerForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = input.value.trim();
+        if (!name) return;
+        const hadActivePlayers = getActivePlayers(team).length > 0;
+        const player = { id: makeId("player"), name, hasPlayed: false, active: true };
+        team.players.push(player);
+        if (!hadActivePlayers) team.currentPlayerIndex = team.players.length - 1;
+        state.standingsPending = false;
+        saveState();
+        close();
+        render();
+      });
+    });
   }
 
   function openModal(content, onReady) {

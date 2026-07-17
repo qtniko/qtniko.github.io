@@ -1093,3 +1093,489 @@ input::placeholder {
   color: var(--ink);
   background: rgba(104, 113, 109, 0.07);
 }
+
+/* Setup balancing controls */
+.setup-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 18px;
+}
+
+.btn:disabled,
+.setup-tools .btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+  box-shadow: none;
+}
+
+/* Live roster controls */
+.score-roster-panel {
+  min-width: 0;
+}
+
+.score-roster-row {
+  align-items: center;
+}
+
+.score-roster-row.inactive-player-row {
+  opacity: 0.6;
+}
+
+.inactive-player-row .score-roster-name {
+  color: #737b77;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.roster-toggle-button {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(70, 77, 73, 0.2);
+  border-radius: 9px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.roster-toggle-button:hover,
+.roster-toggle-button:active {
+  color: var(--ink);
+  background: #fff;
+}
+
+.roster-toggle-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.roster-button-spacer {
+  width: 31px;
+  height: 1px;
+}
+
+.add-live-player-button {
+  width: calc(100% - 20px);
+  min-height: 38px;
+  margin: 0 10px 10px;
+  border: 1px dashed color-mix(in srgb, var(--team-color) 48%, #a8a39b);
+  border-radius: 10px;
+  color: var(--team-color);
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.finish-badge {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid #c7aa68;
+  border-radius: 999px;
+  color: #715619;
+  background: #fff7dc;
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+
+.compact-secondary-actions {
+  display: grid;
+  gap: 7px;
+}
+
+.cancel-substitution-button {
+  width: 100%;
+  min-height: 43px;
+  color: #7c3732;
+  border: 1px solid #e2b3af;
+  background: #fff7f6;
+}
+
+.no-active-panel {
+  margin: auto 0;
+  text-align: center;
+}
+
+/* In-game viewport: no page scrolling is needed to see the player and scoring controls. */
+.game-screen {
+  display: flex;
+  width: min(100%, var(--content));
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  flex-direction: column;
+  padding-bottom: max(7px, env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+.game-screen .scoreboard-wrap {
+  position: relative;
+  z-index: 30;
+  flex: 0 0 auto;
+  margin-bottom: 6px;
+  padding-top: calc(5px + env(safe-area-inset-top));
+  padding-bottom: 5px;
+}
+
+.game-screen .scoreboard {
+  padding-bottom: 0;
+}
+
+.game-screen .score-team {
+  position: relative;
+  overflow: visible;
+}
+
+.game-screen .game-topline {
+  min-height: 32px;
+  flex: 0 0 auto;
+  margin-bottom: 6px;
+}
+
+.game-screen .play-layout {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.game-screen .current-player-card,
+.game-screen .score-entry-panel {
+  min-height: 0;
+}
+
+.game-screen .game-actions {
+  flex: 0 0 auto;
+  margin-top: 5px;
+}
+
+@media (max-width: 879px) {
+  .game-screen {
+    padding-inline: 10px;
+  }
+
+  .game-screen .scoreboard-wrap {
+    margin-inline: -10px;
+    padding-inline: 7px;
+  }
+
+  .game-screen .scoreboard {
+    gap: 5px;
+  }
+
+  .game-screen .score-team {
+    min-width: 105px;
+    flex-basis: 105px;
+    border-width: 1.5px;
+    border-radius: 11px;
+  }
+
+  .game-screen .score-team[open] {
+    min-width: 105px;
+  }
+
+  .game-screen .score-team summary {
+    min-height: 45px;
+    padding: 5px 8px;
+  }
+
+  .game-screen .score-name {
+    font-size: 0.74rem;
+  }
+
+  .game-screen .score-number {
+    font-size: 1.35rem;
+  }
+
+  .game-screen .score-roster-panel {
+    position: fixed;
+    z-index: 60;
+    top: calc(58px + env(safe-area-inset-top));
+    right: 10px;
+    left: 10px;
+    display: none;
+    max-height: calc(100dvh - 70px - env(safe-area-inset-top));
+    overflow-y: auto;
+    border: 2px solid var(--team-color);
+    border-radius: 14px;
+    background: var(--team-soft);
+    box-shadow: 0 18px 50px rgba(25, 31, 28, 0.3);
+  }
+
+  .game-screen .score-team[open] .score-roster-panel {
+    display: block;
+  }
+
+  .game-screen .score-roster {
+    padding-top: 7px;
+  }
+
+  .game-screen .score-roster-row {
+    grid-template-columns: minmax(0, 1fr) auto 31px;
+    gap: 7px;
+    min-height: 42px;
+    padding: 5px 0;
+    font-size: 0.78rem;
+  }
+
+  .game-screen .game-topline {
+    gap: 7px;
+  }
+
+  .game-screen .round-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.055em;
+  }
+
+  .game-screen .deferred-badge,
+  .game-screen .finish-badge {
+    min-height: 21px;
+    padding-inline: 7px;
+    font-size: 0.65rem;
+  }
+
+  .game-screen .game-topline .btn-small {
+    min-height: 31px;
+    padding-inline: 9px;
+    font-size: 0.75rem;
+  }
+
+  .game-screen .play-layout {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .game-screen .current-player-card {
+    padding: 8px 13px;
+    border-width: 2px;
+    border-radius: 15px;
+    box-shadow: 0 7px 18px rgba(39, 43, 38, 0.08);
+  }
+
+  .game-screen .current-player-card::after {
+    right: -35px;
+    bottom: -59px;
+    width: 115px;
+    height: 115px;
+    border-width: 14px;
+  }
+
+  .game-screen .current-team {
+    margin-bottom: 2px;
+    font-size: 0.68rem;
+  }
+
+  .game-screen .current-player {
+    font-size: clamp(1.55rem, 8.2vw, 2.55rem);
+    line-height: 0.96;
+  }
+
+  .game-screen .substitution-note {
+    margin-top: 4px;
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+
+  .game-screen .current-total {
+    margin-top: 5px;
+    font-size: 0.75rem;
+  }
+
+  .game-screen .score-entry-panel {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+    padding: 7px 9px;
+    border-radius: 15px;
+    box-shadow: 0 6px 16px rgba(39, 43, 38, 0.06);
+  }
+
+  .game-screen .score-entry-title {
+    margin-bottom: 0;
+    font-size: 1rem;
+    line-height: 1.05;
+  }
+
+  .game-screen .score-helper {
+    display: none;
+  }
+
+  .game-screen .score-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 5px;
+  }
+
+  .game-screen .score-choice,
+  .game-screen .score-choice[data-score="0"] {
+    grid-column: auto;
+    min-height: 38px;
+    padding: 0;
+    border-radius: 8px;
+    font-size: 0.92rem;
+  }
+
+  .game-screen .selected-score {
+    min-height: 25px;
+    margin-top: 3px;
+    font-size: 0.75rem;
+  }
+
+  .game-screen .selected-score strong {
+    font-size: 1.25rem;
+  }
+
+  .game-screen .submit-score {
+    min-height: 43px;
+    margin-top: 2px;
+    padding-inline: 9px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+  }
+
+  .game-screen .compact-secondary-actions {
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .game-screen .unavailable-button,
+  .game-screen .cancel-substitution-button {
+    min-height: 34px;
+    margin-top: 5px;
+    padding-inline: 7px;
+    border-radius: 9px;
+    font-size: 0.69rem;
+  }
+
+  .game-screen .game-actions .btn-small {
+    min-height: 30px;
+    padding-inline: 10px;
+    font-size: 0.72rem;
+  }
+}
+
+@media (min-width: 880px) {
+  .game-screen .score-roster-panel {
+    position: absolute;
+    z-index: 60;
+    top: calc(100% + 4px);
+    left: 0;
+    display: none;
+    width: max(100%, 260px);
+    max-height: min(58vh, 480px);
+    overflow-y: auto;
+    border: 2px solid var(--team-color);
+    border-radius: 14px;
+    background: var(--team-soft);
+    box-shadow: 0 18px 50px rgba(25, 31, 28, 0.25);
+  }
+
+  .game-screen .score-team[open] .score-roster-panel {
+    display: block;
+  }
+
+  .game-screen .score-roster-row {
+    grid-template-columns: minmax(0, 1fr) auto 31px;
+  }
+
+  .game-screen .play-layout {
+    flex: 1 1 auto;
+  }
+
+  .game-screen .current-player-card,
+  .game-screen .score-entry-panel {
+    height: 100%;
+  }
+
+  .game-screen .score-entry-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: 16px;
+  }
+
+  .game-screen .score-grid {
+    margin-top: 10px;
+  }
+
+  .game-screen .score-choice {
+    min-height: 45px;
+  }
+
+  .game-screen .selected-score {
+    min-height: 35px;
+    margin-top: 6px;
+  }
+
+  .game-screen .submit-score {
+    min-height: 49px;
+    margin-top: 4px;
+  }
+
+  .game-screen .unavailable-button,
+  .game-screen .cancel-substitution-button {
+    min-height: 40px;
+    margin-top: 6px;
+  }
+}
+
+@media (max-height: 610px) and (max-width: 879px) {
+  .game-screen .scoreboard-wrap {
+    margin-bottom: 3px;
+  }
+
+  .game-screen .score-team summary {
+    min-height: 39px;
+  }
+
+  .game-screen .game-topline {
+    min-height: 27px;
+    margin-bottom: 3px;
+  }
+
+  .game-screen .current-player-card {
+    padding-block: 6px;
+  }
+
+  .game-screen .current-player {
+    font-size: clamp(1.35rem, 7.3vw, 2.1rem);
+  }
+
+  .game-screen .score-choice,
+  .game-screen .score-choice[data-score="0"] {
+    min-height: 33px;
+  }
+
+  .game-screen .selected-score {
+    min-height: 21px;
+  }
+
+  .game-screen .submit-score {
+    min-height: 38px;
+  }
+
+  .game-screen .unavailable-button,
+  .game-screen .cancel-substitution-button {
+    min-height: 31px;
+  }
+
+  .game-screen .game-actions {
+    margin-top: 2px;
+  }
+}
+
+.score-roster-row {
+  grid-template-columns: minmax(0, 1fr) auto 31px;
+}
+
+.score-roster-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.editable-scoreboard .score-roster-row {
+  grid-template-columns: minmax(0, 1fr) auto 31px;
+}
