@@ -48,7 +48,11 @@
       winnerId: null,
       selectedSetupTeamId: "auto",
       turnOverride: null,
-      pendingTurnSnapshot: null
+      pendingTurnSnapshot: null,
+      gameStartedAt: null,
+      gameEndedAt: null,
+      currentGameId: null,
+      sessionGames: []
     };
   }
 
@@ -109,6 +113,10 @@
     saved.pendingTurnSnapshot = saved.pendingTurnSnapshot && typeof saved.pendingTurnSnapshot === "object"
       ? saved.pendingTurnSnapshot
       : null;
+    saved.gameStartedAt = Number.isFinite(saved.gameStartedAt) ? saved.gameStartedAt : null;
+    saved.gameEndedAt = Number.isFinite(saved.gameEndedAt) ? saved.gameEndedAt : null;
+    saved.currentGameId = saved.currentGameId || null;
+    saved.sessionGames = Array.isArray(saved.sessionGames) ? saved.sessionGames : [];
 
     if (!Array.isArray(saved.history)) saved.history = [];
     saved.history.forEach((entry) => {
@@ -149,6 +157,16 @@
       saved.currentTeamIndex = ((saved.currentTeamIndex % saved.teams.length) + saved.teams.length) % saved.teams.length;
     } else {
       saved.currentTeamIndex = 0;
+    }
+
+    if (!saved.gameStartedAt && saved.history.length) {
+      saved.gameStartedAt = Number(saved.history[0].timestamp) || Date.now();
+    }
+    if (saved.view === "finished" && !saved.gameEndedAt && saved.history.length) {
+      saved.gameEndedAt = Number(saved.history[saved.history.length - 1].timestamp) || Date.now();
+    }
+    if ((saved.view === "game" || saved.view === "standings" || saved.view === "finished") && !saved.currentGameId) {
+      saved.currentGameId = makeId("game");
     }
 
     delete saved.currentTurnIndex;
@@ -423,6 +441,29 @@
     return "0";
   }
 
+  function formatDuration(milliseconds) {
+    const totalSeconds = Math.max(0, Math.round((Number(milliseconds) || 0) / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    if (hours) return `${hours}h ${minutes}m`;
+    if (minutes) return `${minutes}m ${seconds}s`;
+    return `${seconds}s`;
+  }
+
+  function getGameDurationMs() {
+    const startedAt = state.gameStartedAt || state.history[0]?.timestamp || Date.now();
+    const endedAt = state.gameEndedAt || state.history[state.history.length - 1]?.timestamp || Date.now();
+    return Math.max(0, endedAt - startedAt);
+  }
+
+  function getStandardDeviation(values) {
+    if (!values.length) return 0;
+    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+    const variance = values.reduce((sum, value) => sum + ((value - mean) ** 2), 0) / values.length;
+    return Math.sqrt(variance);
+  }
+
   function makePlayerRecipients(candidates) {
     return candidates.map((candidate) => ({
       id: candidate.player.id,
@@ -693,9 +734,42 @@
     };
   }
 
+  function getFrontRunnersAward() {
+    if (!state.history.length || !state.teams.length) return null;
+    const runningTotals = new Map(state.teams.map((team) => [team.id, 0]));
+    const leadSnapshots = new Map(state.teams.map((team) => [team.id, 0]));
+
+    state.history.forEach((entry) => {
+      runningTotals.set(entry.teamId, entry.resultingTotal);
+      const leaderScore = Math.max(...runningTotals.values());
+      if (leaderScore <= 0) return;
+      state.teams.forEach((team) => {
+        if ((runningTotals.get(team.id) || 0) === leaderScore) {
+          leadSnapshots.set(team.id, (leadSnapshots.get(team.id) || 0) + 1);
+        }
+      });
+    });
+
+    const best = Math.max(...leadSnapshots.values());
+    if (best <= 0) return null;
+    const winners = state.teams.filter((team) => leadSnapshots.get(team.id) === best);
+    return {
+      id: "front-runners",
+      domain: "team",
+      singular: "Front-Runners",
+      plural: "Front-Runners",
+      description: "Held first place after the most throws.",
+      criteria: "Awarded to the team or teams leading after the most recorded throws.",
+      recipients: makeTeamRecipients(winners),
+      value: `${best} ${best === 1 ? "throw led" : "throws led"}`
+    };
+  }
+
   function selectDisplayedAwards() {
-    const mandatory = [getMvpAward(), getBestRoundAward()].filter(Boolean);
-    const optional = [
+    return [
+      getMvpAward(),
+      getBestRoundAward(),
+      getFrontRunnersAward(),
       getCloserAward(),
       getComebackAward(),
       getConsistencyAward(),
@@ -704,24 +778,6 @@
       getTeamCarryAward(),
       getMostMissesAward()
     ].filter(Boolean);
-
-    const usedPlayers = new Set();
-    const usedTeams = new Set();
-    const displayed = [];
-
-    const addAward = (award, mandatoryAward = false) => {
-      const used = award.domain === "player" ? usedPlayers : usedTeams;
-      const recipients = mandatoryAward
-        ? award.recipients
-        : award.recipients.filter((recipient) => !used.has(recipient.id));
-      if (!recipients.length) return;
-      recipients.forEach((recipient) => used.add(recipient.id));
-      displayed.push({ ...award, recipients });
-    };
-
-    mandatory.forEach((award) => addAward(award, true));
-    optional.forEach((award) => addAward(award, false));
-    return displayed;
   }
 
   function render() {
@@ -987,6 +1043,10 @@
       state.winnerId = null;
       state.turnOverride = null;
       state.pendingTurnSnapshot = null;
+      state.gameStartedAt = Date.now();
+      state.gameEndedAt = null;
+      state.currentGameId = makeId("game");
+      state.sessionGames = [];
       state.teams.forEach((team) => {
         team.total = 0;
         team.currentPlayerIndex = 0;
@@ -1120,13 +1180,41 @@
     return state.teams.every((team) => getActivePlayers(team).length === 0);
   }
 
+  function buildCompletedGameRecord() {
+    const winners = getWinningTeams();
+    return {
+      id: state.currentGameId || makeId("game"),
+      number: state.sessionGames.length + 1,
+      startedAt: state.gameStartedAt || state.history[0]?.timestamp || Date.now(),
+      endedAt: state.gameEndedAt || Date.now(),
+      durationMs: getGameDurationMs(),
+      totalThrows: state.history.length,
+      winners: winners.map((team) => ({ id: team.id, name: team.name, color: team.color })),
+      standings: getRankedTeams().map((team) => ({ id: team.id, name: team.name, color: team.color, score: team.total }))
+    };
+  }
+
+  function recordCompletedGame() {
+    if (!state.currentGameId) state.currentGameId = makeId("game");
+    if (!Array.isArray(state.sessionGames)) state.sessionGames = [];
+    if (state.sessionGames.some((game) => game.id === state.currentGameId)) return false;
+    state.sessionGames.push(buildCompletedGameRecord());
+    return true;
+  }
+
+  function finishCurrentGame() {
+    state.view = "finished";
+    if (!state.gameEndedAt) state.gameEndedAt = Date.now();
+    recordCompletedGame();
+  }
+
   function advanceTeamPosition() {
     const isLastTeam = state.currentTeamIndex === state.teams.length - 1;
 
     if (isLastTeam) {
       state.currentTeamIndex = 0;
       if (state.winnerId) {
-        state.view = "finished";
+        finishCurrentGame();
         return;
       }
       if (state.standingsPending) {
@@ -1156,7 +1244,7 @@
   function renderGame() {
     if (allTeamsInactive()) {
       if (state.winnerId) {
-        state.view = "finished";
+        finishCurrentGame();
         saveState();
         render();
         return;
@@ -1442,6 +1530,11 @@
     const last = state.history.pop();
     if (!last) return;
 
+    if (state.currentGameId && Array.isArray(state.sessionGames)) {
+      state.sessionGames = state.sessionGames.filter((game) => game.id !== state.currentGameId);
+    }
+    state.gameEndedAt = null;
+
     const team = getTeam(last.teamId);
     if (team) team.total = last.previousTotal;
 
@@ -1532,7 +1625,6 @@
                     </div>
                   `).join("")}
                 </div>
-                <p class="award-criteria">${escapeHtml(award.criteria)}</p>
               </article>
             `;
           }).join("")}
@@ -1541,7 +1633,163 @@
     `;
   }
 
+  function getTeamStatistics(team) {
+    const entries = state.history.filter((entry) => entry.teamId === team.id);
+    const rawPoints = entries.reduce((sum, entry) => sum + entry.score, 0);
+    const throws = entries.length;
+    const busts = entries.filter((entry) => entry.exceededFifty).length;
+    const misses = entries.filter((entry) => entry.score === 0).length;
+    const scores = entries.map((entry) => entry.score);
+    const minimum = scores.length ? Math.min(...scores) : 0;
+    const maximum = scores.length ? Math.max(...scores) : 0;
+    const average = throws ? rawPoints / throws : 0;
+    const deviation = getStandardDeviation(scores);
+
+    const playerCandidates = team.players
+      .map((player) => {
+        const playerEntries = getRealPlayerEntries(player.id);
+        return {
+          player,
+          throws: playerEntries.length,
+          score: playerEntries.reduce((sum, entry) => sum + entry.contribution, 0)
+        };
+      })
+      .filter((candidate) => candidate.throws > 0);
+
+    const bestPlayerScore = playerCandidates.length
+      ? Math.max(...playerCandidates.map((candidate) => candidate.score))
+      : null;
+    const teamMvps = bestPlayerScore === null
+      ? []
+      : playerCandidates.filter((candidate) => candidate.score === bestPlayerScore);
+
+    return {
+      team,
+      finalScore: team.total,
+      rawPoints,
+      throws,
+      busts,
+      misses,
+      average,
+      minimum,
+      maximum,
+      deviation,
+      teamMvps,
+      bestPlayerScore
+    };
+  }
+
+  function renderGameSummary() {
+    const roundsPlayed = state.history.length
+      ? Math.max(...state.history.map((entry) => Number(entry.round) || 1))
+      : 0;
+    return `
+      <section class="panel results-summary-panel">
+        <p class="eyebrow">At a glance</p>
+        <h2>Game summary</h2>
+        <div class="results-metric-grid">
+          <div class="results-metric">
+            <span>Game duration</span>
+            <strong>${escapeHtml(formatDuration(getGameDurationMs()))}</strong>
+          </div>
+          <div class="results-metric">
+            <span>Total throws</span>
+            <strong>${state.history.length}</strong>
+          </div>
+          <div class="results-metric">
+            <span>Rounds played</span>
+            <strong>${roundsPlayed}</strong>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function renderTeamStatistics() {
+    const statistics = state.teams.map(getTeamStatistics);
+    return `
+      <section class="panel team-statistics-panel">
+        <p class="eyebrow">Full breakdown</p>
+        <h2>Team statistics</h2>
+        <div class="team-statistics-list">
+          ${statistics.map((stats) => {
+            const mvpNames = stats.teamMvps.length
+              ? stats.teamMvps.map((candidate) => escapeHtml(candidate.player.name)).join(", ")
+              : "No real-player throws";
+            const mvpScore = stats.bestPlayerScore === null ? "" : ` · ${escapeHtml(formatPointTotal(stats.bestPlayerScore))}`;
+            return `
+              <article class="team-statistics-card" style="${teamVars(stats.team)}">
+                <div class="team-statistics-heading">
+                  <h3>${escapeHtml(stats.team.name)}</h3>
+                  <strong>${stats.finalScore} pts</strong>
+                </div>
+                <div class="team-stat-grid">
+                  <div class="team-stat-item"><span>Raw points</span><strong>${stats.rawPoints}</strong></div>
+                  <div class="team-stat-item"><span>Total throws</span><strong>${stats.throws}</strong></div>
+                  <div class="team-stat-item"><span>Average throw</span><strong>${stats.average.toFixed(1)}</strong></div>
+                  <div class="team-stat-item"><span>Busts</span><strong>${stats.busts}</strong></div>
+                  <div class="team-stat-item"><span>Misses</span><strong>${stats.misses}</strong></div>
+                  <div class="team-stat-item"><span>Throw spread</span><strong>${stats.throws ? `${stats.minimum}–${stats.maximum}` : "—"}</strong></div>
+                </div>
+                <div class="team-mvp-line">
+                  <span>${stats.teamMvps.length === 1 ? "Team MVP" : "Team MVPs"}</span>
+                  <strong>${mvpNames}${mvpScore}</strong>
+                </div>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderRematchHistory() {
+    if (!Array.isArray(state.sessionGames) || state.sessionGames.length < 2) return "";
+
+    const winCounts = new Map();
+    state.sessionGames.forEach((game) => {
+      (game.winners || []).forEach((winner) => {
+        const existing = winCounts.get(winner.id) || { ...winner, wins: 0 };
+        existing.wins += 1;
+        winCounts.set(winner.id, existing);
+      });
+    });
+    const leaders = [...winCounts.values()].sort((a, b) => b.wins - a.wins || a.name.localeCompare(b.name));
+
+    return `
+      <section class="panel rematch-history-panel">
+        <p class="eyebrow">Session scoreboard</p>
+        <h2>Rematch history</h2>
+        <div class="session-win-list">
+          ${leaders.map((team) => `
+            <span class="session-win-chip" style="--team-color:${team.color};--team-soft:${softenColor(team.color)}">
+              <span>${escapeHtml(team.name)}</span>
+              <strong>${team.wins} ${team.wins === 1 ? "win" : "wins"}</strong>
+            </span>
+          `).join("")}
+        </div>
+        <ol class="rematch-game-list">
+          ${state.sessionGames.map((game, index) => {
+            const winnerText = (game.winners || []).map((winner) => winner.name).join(" & ") || "No winner";
+            const scoreText = (game.standings || []).map((team) => `${team.name} ${team.score}`).join(" · ");
+            return `
+              <li class="rematch-game-row">
+                <div>
+                  <strong>Game ${index + 1}</strong>
+                  <span>${escapeHtml(winnerText)}</span>
+                </div>
+                <div class="rematch-game-meta">${escapeHtml(formatDuration(game.durationMs))} · ${game.totalThrows} throws</div>
+                <div class="rematch-game-scores">${escapeHtml(scoreText)}</div>
+              </li>
+            `;
+          }).join("")}
+        </ol>
+      </section>
+    `;
+  }
+
   function resetForReplay({ shufflePlayers = false } = {}) {
+    if (state.view === "finished") recordCompletedGame();
     if (shufflePlayers) {
       const activePlayers = shuffleArray(state.teams.flatMap((team) => team.players.filter((player) => player.active !== false)));
       const inactivePlayers = shuffleArray(state.teams.flatMap((team) => team.players.filter((player) => player.active === false)));
@@ -1572,6 +1820,9 @@
     state.winnerId = null;
     state.turnOverride = null;
     state.pendingTurnSnapshot = null;
+    state.gameStartedAt = Date.now();
+    state.gameEndedAt = null;
+    state.currentGameId = makeId("game");
     state.view = "game";
     openScoreboardTeamId = null;
     saveState();
@@ -1580,6 +1831,9 @@
 
   function renderFinished() {
     openScoreboardTeamId = null;
+    if (!state.gameEndedAt) state.gameEndedAt = state.history[state.history.length - 1]?.timestamp || Date.now();
+    const addedSessionRecord = recordCompletedGame();
+    if (addedSessionRecord) saveState();
     const winners = getWinningTeams();
     const multipleWinners = winners.length > 1;
     const blendedColor = averageTeamColor(winners);
@@ -1609,6 +1863,10 @@
           ${standingsMarkup()}
         </section>
 
+        ${renderGameSummary()}
+
+        ${renderTeamStatistics()}
+
         ${renderAwards()}
 
         <section class="panel">
@@ -1616,6 +1874,8 @@
           <p class="helper">Each line shows a team’s total after each of its throws.</p>
           ${renderChart()}
         </section>
+
+        ${renderRematchHistory()}
 
         <details class="panel history-panel">
           <summary class="history-summary">
@@ -1672,6 +1932,7 @@
       const entries = state.history.filter((entry) => entry.teamId === team.id);
       return {
         team,
+        entries,
         values: [0, ...entries.map((entry) => entry.resultingTotal)]
       };
     });
@@ -1685,7 +1946,7 @@
       `;
     }).join("");
 
-    const lines = series.map(({ team, values }) => {
+    const lines = series.map(({ team, entries, values }) => {
       const points = values.map((value, index) => {
         const x = left + (index / (maxPoints - 1)) * plotWidth;
         const y = top + plotHeight - (value / 50) * plotHeight;
@@ -1698,7 +1959,21 @@
         return `<circle cx="${x}" cy="${y}" r="3.5" fill="${team.color}" />`;
       }).join("");
 
-      return `<polyline points="${points}" fill="none" stroke="${team.color}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />${circles}`;
+      const bustMarkers = entries.map((entry, entryIndex) => {
+        if (!entry.exceededFifty) return "";
+        const pointIndex = entryIndex + 1;
+        const x = left + (pointIndex / (maxPoints - 1)) * plotWidth;
+        const y = top + plotHeight - (entry.resultingTotal / 50) * plotHeight;
+        return `
+          <g class="bust-marker">
+            <title>${escapeHtml(team.name)} bust in round ${entry.round}: ${entry.previousTotal} + ${entry.score}, reset to 25</title>
+            <rect x="${x - 6}" y="${y - 6}" width="12" height="12" rx="1.5" fill="#fff" stroke="${team.color}" stroke-width="3" transform="rotate(45 ${x} ${y})" />
+            <circle cx="${x}" cy="${y}" r="2.2" fill="${team.color}" />
+          </g>
+        `;
+      }).join("");
+
+      return `<polyline points="${points}" fill="none" stroke="${team.color}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />${circles}${bustMarkers}`;
     }).join("");
 
     return `
@@ -1715,6 +1990,9 @@
         ${state.teams.map((team) => `
           <span class="legend-item" style="${teamVars(team)}"><span class="legend-dot"></span>${escapeHtml(team.name)}</span>
         `).join("")}
+        ${state.history.some((entry) => entry.exceededFifty) ? `
+          <span class="legend-item"><span class="legend-bust-marker" aria-hidden="true"></span>Bust reset</span>
+        ` : ""}
       </div>
     `;
   }

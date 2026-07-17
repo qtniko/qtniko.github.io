@@ -40,12 +40,14 @@ https://YOUR-USERNAME.github.io/molkky/
 - Reaching exactly 50 starts the final team cycle; all remaining teams finish, and every team ending that cycle on 50 shares the win
 - Going over 50 resets the team to 25
 - Individual bust scoring credits the points needed to reach 50, then applies the −25 reset penalty
-- End-game awards include mandatory MVP and Round Royals results plus qualifying unique player/team highlights
+- End-game awards include mandatory MVP and Round Royals results plus every qualifying player/team highlight
 - Persistent team scores at the top with expandable live player controls
 - Compact in-game phone layout keeps the current player and all scoring controls on one screen
 - Undo last throw, including substitution, deferred-queue, and pending-winner state
 - Local browser saving, including refresh recovery
 - Final standings, pluralized game awards, collapsible throw history, and a fully responsive score progression graph
+- Game duration, total throws, detailed per-team statistics, and bust markers on the graph
+- Session rematch history appears after a second completed game
 - Replay with the same teams or reshuffle players while keeping inactive players inactive
 
 No build step or dependencies are required.
