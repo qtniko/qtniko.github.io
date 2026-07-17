@@ -317,6 +317,34 @@ input::placeholder {
   font-weight: 750;
 }
 
+.setup-team-meta {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.delete-team-button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 1.2rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.delete-team-button:hover,
+.delete-team-button:active {
+  color: #8c241e;
+  background: rgba(255, 255, 255, 0.78);
+}
+
 .player-list {
   display: grid;
   gap: 8px;

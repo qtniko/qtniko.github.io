@@ -77,6 +77,11 @@
     return Array.from({ length: count }, (_, index) => createTeam(index)).filter(Boolean);
   }
 
+  function getNextAvailableTeamStyleIndex() {
+    const usedColors = new Set(state.teams.map((team) => team.color));
+    return TEAM_STYLES.findIndex((style) => !usedColors.has(style.color));
+  }
+
   function makeId(prefix) {
     if (window.crypto && typeof window.crypto.randomUUID === "function") {
       return `${prefix}-${window.crypto.randomUUID()}`;
@@ -932,7 +937,12 @@
                 ${pencilIcon()}
               </button>
             </div>
-            <span class="player-count">${team.players.length} ${team.players.length === 1 ? "player" : "players"}</span>
+            <div class="setup-team-meta">
+              <span class="player-count">${team.players.length} ${team.players.length === 1 ? "player" : "players"}</span>
+              ${team.players.length === 0 && state.teams.length > MIN_TEAMS ? `
+                <button type="button" class="delete-team-button" data-team-id="${team.id}" aria-label="Delete ${escapeHtml(team.name)}">×</button>
+              ` : ""}
+            </div>
           </div>
           ${players}
         </article>
@@ -1018,9 +1028,25 @@
       });
     });
 
+    document.querySelectorAll(".delete-team-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const teamId = button.dataset.teamId;
+        const team = getTeam(teamId);
+        if (!team || team.players.length > 0 || state.teams.length <= MIN_TEAMS) return;
+
+        state.teams = state.teams.filter((candidate) => candidate.id !== teamId);
+        state.teamCount = state.teams.length;
+        if (state.selectedSetupTeamId === teamId) state.selectedSetupTeamId = "auto";
+        setupError = "";
+        saveState();
+        renderPlayerSetup();
+      });
+    });
+
     document.getElementById("addTeam").addEventListener("click", () => {
       if (state.teams.length >= MAX_TEAMS) return;
-      const team = createTeam(state.teams.length);
+      const styleIndex = getNextAvailableTeamStyleIndex();
+      const team = createTeam(styleIndex);
       if (!team) return;
       state.teams.push(team);
       state.teamCount = state.teams.length;
